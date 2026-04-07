@@ -443,6 +443,62 @@
   .upload-area:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
 
 
+
+  /* ── Photo upload (modal) ── */
+  .photo-upload-area {
+    border: 2px dashed var(--border-strong); border-radius: var(--radius);
+    padding: 0; text-align: center; cursor: pointer;
+    color: var(--text-muted); font-size: 12px;
+    transition: all 0.15s; overflow: hidden; position: relative;
+    min-height: 80px; display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 6px;
+    background: var(--bg);
+  }
+  .photo-upload-area:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .photo-upload-area.has-photo { border-style: solid; border-color: var(--accent); padding: 0; }
+  .photo-upload-area img {
+    width: 100%; max-height: 200px; object-fit: cover;
+    border-radius: calc(var(--radius) - 2px); display: block;
+  }
+  .photo-upload-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    opacity: 0; transition: opacity 0.2s; border-radius: calc(var(--radius) - 2px);
+  }
+  .photo-upload-area.has-photo:hover .photo-upload-overlay { opacity: 1; }
+  .photo-btn {
+    background: #fff; color: var(--text); border: none;
+    border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+  }
+  .photo-btn.danger { background: var(--danger-bg); color: var(--danger); }
+
+  /* カメラ・ギャラリー選択UI */
+  .photo-source-row { display: flex; gap: 8px; margin-top: 6px; }
+  .photo-source-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    gap: 4px; padding: 10px 8px;
+    border: 1px solid var(--border-strong); border-radius: var(--radius);
+    background: var(--surface); cursor: pointer; font-family: inherit;
+    font-size: 11px; font-weight: 700; color: var(--text-sub);
+    transition: all 0.15s;
+  }
+  .photo-source-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .photo-source-btn .psb-icon { font-size: 22px; }
+
+  /* 詳細モーダル内の写真表示 */
+  .detail-photo {
+    width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
+    object-fit: cover; max-height: 240px; cursor: zoom-in; display: block;
+  }
+  .photo-lightbox {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.88);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999; cursor: zoom-out;
+  }
+  .photo-lightbox img { max-width: 94vw; max-height: 90vh; border-radius: var(--radius); }
+
   /* ── Value tags ── */
   .tag-cheap  { background:#e8f0eb; color:#2d5a3d; }
   .tag-valuable { background:#fdf0f0; color:#8b1a1a; }
@@ -908,6 +964,7 @@
           <div class="tab" onclick="switchGasTab(1)">LINE通知</div>
           <div class="tab" onclick="switchGasTab(2)">自動返信メール</div>
           <div class="tab" onclick="switchGasTab(3)">期限チェック</div>
+          <div class="tab" onclick="switchGasTab(4)">📷 写真保存</div>
         </div>
 
         <div id="gas-tab-0" class="gas-tab card">
@@ -1150,6 +1207,115 @@ function checkDeadlines() {
             <button class="btn btn-secondary btn-sm" onclick="copyCode(3)" style="margin-top:10px;">📋 コピー</button>
           </div>
         </div>
+
+        <div id="gas-tab-4" class="gas-tab card" style="display:none;">
+          <div class="card-header"><h3>📷 写真をGoogleドライブに保存するGASコード</h3></div>
+          <div class="card-body">
+            <div class="notice info" style="margin-bottom:12px;">
+              <span class="notice-icon" style="font-size:14px;flex-shrink:0;">ℹ️</span>
+              <div style="font-size:12px;">スタッフが写真を撮影後、このエンドポイントにBase64データを送るとGoogleドライブに保存されます。スプレッドシートの写真URL列に自動記録されます。</div>
+            </div>
+            <pre style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.7;overflow-x:auto;color:var(--text);">// ============================================
+// 写真をGoogleドライブに保存 + 台帳URLを更新
+// GASをウェブアプリとして「全員」にデプロイ
+// ============================================
+
+const DRIVE_FOLDER_ID = 'YOUR_DRIVE_FOLDER_ID'; // ★ 変更
+
+function doPost(e) {
+  try {
+    const params = JSON.parse(e.postData.contents);
+    const base64 = params.imageBase64;   // "data:image/jpeg;base64,..." 形式
+    const manageId = params.manageId;    // 管理番号 例: LF-20260401-001
+    const mimeType = params.mimeType || 'image/jpeg';
+
+    // Base64 → Blob に変換
+    const base64Data = base64.split(',')[1];
+    const blob = Utilities.newBlob(
+      Utilities.base64Decode(base64Data),
+      mimeType,
+      manageId + '.jpg'
+    );
+
+    // Googleドライブに保存
+    const folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+    const file = folder.createFile(blob);
+    file.setSharing(
+      DriveApp.Access.ANYONE_WITH_LINK,
+      DriveApp.Permission.VIEW
+    );
+    const fileUrl = 'https://drive.google.com/uc?id=' + file.getId();
+
+    // 台帳スプレッドシートの写真URL列を更新
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const sheet = ss.getSheetByName(SHEET_NAME);
+    const data = sheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0] === manageId) {
+        // H列（写真URL列 = 8列目）に書き込み
+        sheet.getRange(i + 1, 8).setValue(fileUrl);
+        break;
+      }
+    }
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: true, url: fileUrl }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch(err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, error: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// ============================================
+// Webアプリとしてデプロイする手順：
+// 1. Apps Script → 「デプロイ」→「新しいデプロイ」
+// 2. 種類：ウェブアプリ
+// 3. 次のユーザーとして実行：自分
+// 4. アクセスできるユーザー：全員（または組織内）
+// 5. デプロイ後に表示される「ウェブアプリURL」をコピー
+// 6. Webアプリの GAS_ENDPOINT 定数に貼り付ける
+// ============================================
+</pre>
+            <button class="btn btn-secondary btn-sm" onclick="copyCode(4)" style="margin-top:10px;">📋 コピー</button>
+
+            <div style="margin-top:16px;" class="card">
+              <div class="card-header"><h3>Webアプリ側の送信コード</h3></div>
+              <div class="card-body">
+                <p style="font-size:12px;color:var(--text-sub);margin-bottom:10px;">以下のコードを lost-item-system.html の &lt;script&gt; に追加すると、写真をGASに自動送信してドライブに永続保存できます。</p>
+                <pre style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.7;overflow-x:auto;color:var(--text);">// ★ GASウェブアプリのURLに変更してください
+const GAS_ENDPOINT = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+
+async function uploadPhotoToGAS(manageId, base64Data) {
+  if (!GAS_ENDPOINT.includes('YOUR_SCRIPT_ID')) {
+    try {
+      const res = await fetch(GAS_ENDPOINT, {
+        method: 'POST',
+        body: JSON.stringify({
+          imageBase64: base64Data,
+          manageId: manageId,
+          mimeType: 'image/jpeg'
+        })
+      });
+      const json = await res.json();
+      if (json.success) {
+        console.log('写真をドライブに保存しました:', json.url);
+        return json.url;
+      }
+    } catch(e) {
+      console.error('写真アップロード失敗:', e);
+    }
+  }
+  return null; // GAS未設定時はBase64をローカル保持
+}
+</pre>
+                <button class="btn btn-secondary btn-sm" onclick="copyCode(5)" style="margin-top:10px;">📋 コピー</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div><!-- /content -->
@@ -1234,6 +1400,29 @@ function checkDeadlines() {
         <div class="form-group full">
           <label>特徴・詳細</label>
           <textarea class="form-control" id="m-item-detail" placeholder="色・ブランド・中身など"></textarea>
+        </div>
+
+        <div class="form-group full">
+          <label>写真を撮影・添付</label>
+          <!-- カメラ・ギャラリー選択ボタン -->
+          <div class="photo-source-row" id="m-photo-source-row">
+            <button type="button" class="photo-source-btn" onclick="triggerPhotoInput('camera')">
+              <span class="psb-icon">📷</span>カメラ撮影
+            </button>
+            <button type="button" class="photo-source-btn" onclick="triggerPhotoInput('gallery')">
+              <span class="psb-icon">🖼️</span>ギャラリーから選択
+            </button>
+          </div>
+          <input type="file" id="m-photo-input-camera"  accept="image/*" capture="environment" style="display:none" onchange="handleModalPhoto(this)">
+          <input type="file" id="m-photo-input-gallery" accept="image/*" style="display:none" onchange="handleModalPhoto(this)">
+          <!-- プレビュー -->
+          <div class="photo-upload-area" id="m-photo-area" style="margin-top:8px;display:none;">
+            <img id="m-photo-preview" src="" alt="写真プレビュー">
+            <div class="photo-upload-overlay">
+              <button class="photo-btn" onclick="triggerPhotoInput('gallery')">🔄 変更</button>
+              <button class="photo-btn danger" onclick="removeModalPhoto()">🗑️ 削除</button>
+            </div>
+          </div>
         </div>
         <div class="form-group">
           <label>問い合わせ者名</label>
@@ -1490,6 +1679,18 @@ function openLedgerModal(idx) {
     document.getElementById('m-public-name').value = d.publicName || '';
     document.getElementById('m-box-no').value = d.boxNo || '';
     toggleBoxNo();
+    // 写真読み込み
+    if (d.photoData) {
+      document.getElementById('m-photo-preview').src = d.photoData;
+      document.getElementById('m-photo-area').style.display = '';
+      document.getElementById('m-photo-area').classList.add('has-photo');
+      document.getElementById('m-photo-source-row').style.display = 'none';
+    } else {
+      document.getElementById('m-photo-preview').src = '';
+      document.getElementById('m-photo-area').style.display = 'none';
+      document.getElementById('m-photo-area').classList.remove('has-photo');
+      document.getElementById('m-photo-source-row').style.display = '';
+    }
   } else {
     document.getElementById('m-found-date').value = new Date().toISOString().slice(0,10);
     document.getElementById('m-found-place').value = 'スタジオ内';
@@ -1503,6 +1704,11 @@ function openLedgerModal(idx) {
     document.getElementById('m-public-name').value = '';
     document.getElementById('m-box-no').value = '';
     toggleBoxNo();
+    // 写真リセット
+    document.getElementById('m-photo-preview').src = '';
+    document.getElementById('m-photo-area').style.display = 'none';
+    document.getElementById('m-photo-area').classList.remove('has-photo');
+    document.getElementById('m-photo-source-row').style.display = '';
   }
   document.getElementById('ledger-modal').classList.add('open');
 }
@@ -1529,6 +1735,7 @@ function saveLedger() {
       value: document.getElementById('m-value').value,
       publicName: document.getElementById('m-public-name').value.trim(),
       boxNo: document.getElementById('m-box-no').value.trim(),
+      photoData: document.getElementById('m-photo-preview').src || ledgerData[editingIdx].photoData || '',
     };
     showToast('✅ 更新しました');
   } else {
@@ -1545,6 +1752,7 @@ function saveLedger() {
       value: document.getElementById('m-value').value,
       publicName: document.getElementById('m-public-name').value.trim(),
       boxNo: document.getElementById('m-box-no').value.trim(),
+      photoData: document.getElementById('m-photo-preview').src || '',
       deadline,
     });
     showToast('✅ 登録しました（管理番号: ' + id + '）');
@@ -1578,6 +1786,7 @@ function showDetail(idx) {
       <div class="detail-item"><div class="dl">価値区分</div><div class="dd"><span class="tag ${valueClass[d.value||'cheap']}">${valueLabel[d.value||'cheap']}</span></div></div>
       <div class="detail-item"><div class="dl">公開表示名</div><div class="dd">${d.publicName||'-'}</div></div>
       <div class="detail-item"><div class="dl">ボックス番号</div><div class="dd">${d.boxNo||'-'}</div></div>
+      ${d.photoData ? `<div class="detail-item full"><div class="dl">写真</div><div class="dd"><img class="detail-photo" src="${d.photoData}" alt="忘れ物写真" onclick="openLightbox('${d.photoData}')"></div></div>` : ''}
     </div>
   `;
   document.getElementById('detail-modal').classList.add('open');
@@ -1699,6 +1908,74 @@ function showToast(msg) {
   setTimeout(() => toast.remove(), 3000);
 }
 
+
+
+// ── Modal Photo ──
+function triggerPhotoInput(source) {
+  if (source === 'camera') {
+    document.getElementById('m-photo-input-camera').click();
+  } else {
+    document.getElementById('m-photo-input-gallery').click();
+  }
+}
+
+function handleModalPhoto(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const reader = new FileReader();
+  reader.onload = e => {
+    const data = e.target.result;
+    const preview = document.getElementById('m-photo-preview');
+    const area    = document.getElementById('m-photo-area');
+    const srcRow  = document.getElementById('m-photo-source-row');
+    preview.src = data;
+    area.style.display = '';
+    area.classList.add('has-photo');
+    srcRow.style.display = 'none';
+
+    // 圧縮（長辺1200px以内にリサイズ）
+    compressImage(data, 1200, 0.82, compressed => {
+      preview.src = compressed;
+    });
+  };
+  reader.readAsDataURL(file);
+  // reset input so same file can be re-selected
+  input.value = '';
+}
+
+function removeModalPhoto() {
+  document.getElementById('m-photo-preview').src = '';
+  document.getElementById('m-photo-area').style.display = 'none';
+  document.getElementById('m-photo-area').classList.remove('has-photo');
+  document.getElementById('m-photo-source-row').style.display = '';
+}
+
+// 画像圧縮（Canvas経由）
+function compressImage(dataUrl, maxSize, quality, callback) {
+  const img = new Image();
+  img.onload = () => {
+    let w = img.width, h = img.height;
+    if (w > maxSize || h > maxSize) {
+      if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+      else       { w = Math.round(w * maxSize / h); h = maxSize; }
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    callback(canvas.toDataURL('image/jpeg', quality));
+  };
+  img.src = dataUrl;
+}
+
+// ライトボックス（写真拡大表示）
+function openLightbox(src) {
+  if (!src) return;
+  const lb = document.createElement('div');
+  lb.className = 'photo-lightbox';
+  lb.innerHTML = `<img src="${src}" alt="写真">`;
+  lb.onclick = () => lb.remove();
+  document.body.appendChild(lb);
+}
 
 // ── Toggle box number field ──
 function toggleBoxNo() {
