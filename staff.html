@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>忘れ物お問い合わせ</title>
+<title>忘れ物管理システム（スタッフ用）</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -628,34 +628,12 @@
   }
 
 
-/* ── Customer Mode ── */
-body.customer-mode .sidebar,
-body.customer-mode #bottom-nav,
-body.customer-mode #mobile-quick-actions,
-body.customer-mode #page-dashboard,
-body.customer-mode #page-ledger,
-body.customer-mode #page-sop,
-body.customer-mode #page-gas,
-body.customer-mode #ledger-modal,
-body.customer-mode #detail-modal,
-body.customer-mode .nav-item,
-body.customer-mode .nav-group { display: none !important; }
-body.customer-mode .main { margin-left: 0; }
-body.customer-mode .content { max-width: 960px; width: 100%; margin: 0 auto; }
-body.customer-mode .topbar { height: auto; min-height: 64px; padding-top: 14px; padding-bottom: 14px; }
-body.customer-mode .customer-topbar-sub { font-size: 12px; color: var(--text-sub); margin-top: 4px; }
-body.customer-mode .sidebar-logo { border-bottom: none; }
-body.customer-mode .pub-close-btn::after { content: ''; }
-@media (max-width: 640px) {
-  body.customer-mode .topbar { padding: 12px 14px; align-items: flex-start; }
-  body.customer-mode .topbar .actions { width: 100%; justify-content: flex-end; }
-  body.customer-mode .customer-topbar { flex-direction: column; gap: 10px; }
-  body.customer-mode .content { padding: 14px; }
-}
+/* ── Staff helper link ── */
+body.staff-mode .topbar .actions a.btn { text-decoration: none; }
 
 </style>
 </head>
-<body class="customer-mode" data-role="customer">
+<body class="staff-mode" data-role="staff">
 <!-- GitHub Pages 公開用版 -->
 
 <div class="app">
@@ -700,6 +678,7 @@ body.customer-mode .pub-close-btn::after { content: ''; }
     <div class="topbar">
       <h2 id="page-title">ダッシュボード</h2>
       <div class="actions">
+        <a class="btn btn-secondary btn-sm" href="./index.html">👤 お客さん用フォーム</a>
         <span id="sync-status" style="font-size:11px;color:var(--text-muted);display:none;"></span>
         <button class="btn btn-secondary btn-sm" id="topbar-sync-btn" onclick="loadFromGAS()" title="スプレッドシートから最新データを読み込む">🔄 同期</button>
         <button class="btn btn-secondary btn-sm" id="topbar-form-btn" onclick="showPage('form')">＋ 新規問い合わせ</button>
@@ -780,21 +759,11 @@ body.customer-mode .pub-close-btn::after { content: ''; }
         </div>
       </div>
 
-
-<!-- Form -->
-<div id="page-form" class="page">
-  <div class="card customer-entry-card" style="margin-bottom:16px;">
-    <div class="card-body" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-      <div>
-        <div style="font-size:15px;font-weight:700;">まずは保管中の忘れ物一覧をご確認ください</div>
-        <div style="font-size:12px;color:var(--text-sub);margin-top:4px;">心当たりのある物が見つからない場合も、そのままフォームからお問い合わせいただけます。</div>
-      </div>
-      <button class="btn btn-primary" type="button" onclick="openPublicPage()">👁️ 公開一覧を見る</button>
-    </div>
-  </div>
-  <div class="notice info" style="margin-bottom:20px;">
+      <!-- Form -->
+      <div id="page-form" class="page">
+        <div class="notice info" style="margin-bottom:20px;">
           <span class="icon">ℹ️</span>
-          <div>忘れ物のお問い合わせ専用フォームです。ご利用日・店舗・部屋名・忘れ物の特徴をご入力ください。送信後に受付メッセージが表示されます。</div>
+          <div>このフォームはスタッフ・顧客向けの問い合わせ受付画面です。送信後に自動返信メッセージが表示されます。</div>
         </div>
 
         <div class="card">
