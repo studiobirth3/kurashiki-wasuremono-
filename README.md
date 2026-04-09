@@ -1,4 +1,3 @@
-[README.md](https://github.com/user-attachments/files/26586718/README.md)
 # 忘れ物管理システム（お客さん用URL / スタッフ用URL 分離版）
 
 ## ファイル構成

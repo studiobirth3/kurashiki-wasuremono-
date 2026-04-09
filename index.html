@@ -506,6 +506,10 @@
     width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
     object-fit: cover; max-height: 240px; cursor: zoom-in; display: block;
   }
+
+  .detail-photo.is-broken { display:none; }
+  .detail-photo-link { display:inline-block; margin-top:8px; font-size:12px; }
+  .detail-photo-note { display:none; margin-top:8px; font-size:12px; color:var(--text-sub); }
   .photo-lightbox {
     position: fixed; inset: 0; background: rgba(0,0,0,0.88);
     display: flex; align-items: center; justify-content: center;
@@ -2370,6 +2374,48 @@ function saveLedger() {
   }
 }
 
+
+function extractDriveFileId(url) {
+  if (!url) return '';
+  const s = String(url);
+  let m = s.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (m) return m[1];
+  m = s.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (m) return m[1];
+  m = s.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (m) return m[1];
+  return '';
+}
+
+function getDisplayPhotoUrl(url) {
+  if (!url) return '';
+  const fileId = extractDriveFileId(url);
+  if (!fileId) return url;
+  return `https://drive.google.com/uc?export=view&id=${fileId}`;
+}
+
+function getDisplayPhotoFallbackUrl(url) {
+  const fileId = extractDriveFileId(url);
+  if (!fileId) return url || '';
+  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1600`;
+}
+
+function handleDetailPhotoError(img) {
+  if (!img) return;
+  const fallback = img.dataset && img.dataset.fallback ? img.dataset.fallback : '';
+  if (fallback && !img.dataset.fallbackTried) {
+    img.dataset.fallbackTried = '1';
+    img.src = fallback;
+    return;
+  }
+  img.classList.add('is-broken');
+  const wrap = img.closest('.detail-photo-wrap');
+  if (wrap) {
+    const note = wrap.querySelector('.detail-photo-note');
+    if (note) note.style.display = 'block';
+  }
+}
+
 // ── Detail Modal ──
 function showDetail(idx) {
   const d = ledgerData[idx];
@@ -2390,7 +2436,7 @@ function showDetail(idx) {
       <div class="detail-item"><div class="dl">価値区分</div><div class="dd"><span class="tag ${valueClass[d.value||'cheap']}">${valueLabel[d.value||'cheap']}</span></div></div>
       <div class="detail-item"><div class="dl">公開表示名</div><div class="dd">${d.publicName||'-'}</div></div>
       <div class="detail-item"><div class="dl">ボックス番号</div><div class="dd">${d.boxNo||'-'}</div></div>
-      ${d.photoData ? `<div class="detail-item full"><div class="dl">写真</div><div class="dd"><img class="detail-photo" src="${d.photoData}" alt="忘れ物写真" onclick="openLightbox('${d.photoData}')"></div></div>` : ''}
+      ${d.photoData ? `<div class="detail-item full"><div class="dl">写真</div><div class="dd detail-photo-wrap"><img class="detail-photo" src="${getDisplayPhotoUrl(d.photoData)}" data-fallback="${getDisplayPhotoFallbackUrl(d.photoData)}" alt="忘れ物写真" onclick="openLightbox('${getDisplayPhotoUrl(d.photoData)}')" onerror="handleDetailPhotoError(this)"><div class="detail-photo-note">プレビューできない場合は、下のリンクから写真を開いてください。</div><a class="detail-photo-link" href="${getDisplayPhotoUrl(d.photoData)}" target="_blank" rel="noopener">写真を別タブで開く</a></div></div>` : ''}
     </div>
   `;
   const deleteBtn = document.getElementById('detail-delete-btn');
