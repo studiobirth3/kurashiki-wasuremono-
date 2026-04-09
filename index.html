@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>忘れ物管理システム</title>
+<title>忘れ物管理システム | GitHub Pages版</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -565,6 +565,7 @@
 </style>
 </head>
 <body>
+<!-- GitHub Pages 公開用版 -->
 
 <div class="app">
   <!-- Sidebar -->
@@ -1788,7 +1789,7 @@ const GAS_ENDPOINT_PLACEHOLDER = 'YOUR_SCRIPT_ID';
 let GAS_ENDPOINT = localStorage.getItem('lostItemGasEndpoint') || GAS_ENDPOINT_PLACEHOLDER;
 
 function getGasEndpoint() {
-  return (GAS_ENDPOINT || '').trim().replace(/\/$/, '');
+  return (GAS_ENDPOINT || '').trim();
 }
 
 function escapeHtml(str) {
@@ -1801,7 +1802,7 @@ function escapeHtml(str) {
 }
 
 function isValidGasEndpoint(url) {
-  return /^https:\/\/script\.google\.com\/macros\/s\/.+\/(exec|dev)$/.test((url || '').trim());
+  return /^https:\/\/script\.google\.com\/macros\/s\//.test((url || '').trim());
 }
 
 function hasGasEndpoint() {
@@ -2385,72 +2386,21 @@ function openLightbox(src) {
 // GAS同期機能
 // ══════════════════════════════════════════
 
-// GASへのGETリクエスト（読み込み用）
-async function gasRequestGet(params = {}) {
-  if (!ensureGasEndpointFromInput()) {
-    return { success:false, error:'GAS URL未設定' };
-  }
-
-  try {
-    const endpoint = new URL(getGasEndpoint());
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        endpoint.searchParams.set(key, value);
-      }
-    });
-    endpoint.searchParams.set('_ts', String(Date.now()));
-
-    const res = await fetch(endpoint.toString(), {
-      method: 'GET',
-      mode: 'cors',
-      redirect: 'follow',
-      cache: 'no-store'
-    });
-
-    const text = await res.text();
-    try {
-      return JSON.parse(text);
-    } catch (parseError) {
-      return {
-        success: false,
-        error: 'GASからJSON以外が返りました',
-        status: res.status,
-        rawText: text.slice(0, 300)
-      };
-    }
-  } catch (e) {
-    console.error('GAS GET通信エラー:', e);
-    return { success:false, error:'GAS GET通信エラー: ' + (e && e.message ? e.message : e) };
-  }
-}
-
-// GASへのPOSTリクエスト（保存用）
+// GASへのリクエスト共通関数
 async function gasRequest(payload) {
-  if (!ensureGasEndpointFromInput()) {
-    return { success:false, error:'GAS URL未設定' };
-  }
+  if (!ensureGasEndpointFromInput()) return null;
   try {
-    const res = await fetch(getGasEndpoint(), {
+    const res = await fetch(GAS_ENDPOINT, {
       method: 'POST',
       mode: 'cors',
-      redirect: 'follow',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(payload)
     });
     const text = await res.text();
-    try {
-      return JSON.parse(text);
-    } catch(parseError) {
-      return {
-        success: false,
-        error: 'GASからJSON以外が返りました',
-        status: res.status,
-        rawText: text.slice(0, 300)
-      };
-    }
+    return JSON.parse(text);
   } catch(e) {
     console.error('GAS通信エラー:', e);
-    return { success:false, error:'GAS通信エラー: ' + (e && e.message ? e.message : e) };
+    return null;
   }
 }
 
@@ -2483,8 +2433,9 @@ async function loadFromGAS() {
     return;
   }
   showSyncStatus('🔄 スプレッドシートから読み込み中...');
-  const result = await gasRequestGet({ action: 'getAll' });
-  if (result && result.success && Array.isArray(result.items) && result.items.length > 0) {
+  const result = await gasRequest({ action: 'getAll' });
+  if (result && result.success && result.items.length > 0) {
+    // スプレッドシートのデータをledgerDataに変換
     ledgerData = result.items.map(row => ({
       id:             row.id || '',
       rowCreatedAt:   row.rowCreatedAt || '',
@@ -2516,7 +2467,8 @@ async function loadFromGAS() {
       terms3:         row.terms3 || '',
       terms4:         row.terms4 || '',
       terms5:         row.terms5 || '',
-    })).filter(d => d.id);
+    })).filter(d => d.id); // id空行を除外
+    // nextId を最新番号から算出
     const nums = ledgerData.map(d => {
       const m = d.id.match(/(\d+)$/);
       return m ? parseInt(m[1]) : 0;
@@ -2525,16 +2477,13 @@ async function loadFromGAS() {
     renderDashboard();
     renderLedger();
     showSyncStatus('✅ ' + ledgerData.length + '件を読み込みました');
-  } else if (result && result.success && Array.isArray(result.items) && result.items.length === 0) {
+  } else if (result && result.success && result.items.length === 0) {
     ledgerData = [];
     renderDashboard();
     renderLedger();
     showSyncStatus('✅ スプレッドシートに登録データなし');
   } else {
-    const detail = result && result.error ? ' / ' + result.error : '';
-    const raw = result && result.rawText ? ' / 返答: ' + String(result.rawText).slice(0, 80) : '';
-    showSyncStatus('❌ 読み込み失敗' + detail + raw);
-    console.error('loadFromGAS failed:', result);
+    showSyncStatus('❌ 読み込み失敗。GAS設定を確認してください');
   }
 }
 
