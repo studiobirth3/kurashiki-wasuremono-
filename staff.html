@@ -628,6 +628,26 @@
   }
 
 
+  .mobile-save-bar { display:none; }
+  @media (max-width: 640px) {
+    .mobile-save-bar {
+      display:block;
+      position: sticky;
+      bottom: 0;
+      margin-top: 14px;
+      padding-top: 12px;
+      background: linear-gradient(to top, var(--surface) 75%, rgba(255,255,255,0));
+      z-index: 2;
+    }
+    .mobile-save-bar .btn {
+      width: 100%;
+      justify-content: center;
+      min-height: 52px;
+      font-size: 16px;
+    }
+  }
+
+
 /* ── Staff helper link ── */
 body.staff-mode .topbar .actions a.btn { text-decoration: none; }
 
@@ -1754,6 +1774,9 @@ function jsonResponse(obj) {
           <label>忘れ物ボックス番号<span style="font-size:10px;font-weight:400;margin-left:6px;color:var(--text-muted);">安価品のみ：お客さんが直接引き取るボックス</span></label>
           <input type="text" class="form-control" id="m-box-no" placeholder="例：A-1、B-3">
         </div>
+      </div>
+      <div class="mobile-save-bar">
+        <button class="btn btn-primary" type="button" onclick="saveLedger()">✅ この内容で登録する</button>
       </div>
     </div>
     <div class="modal-footer">
