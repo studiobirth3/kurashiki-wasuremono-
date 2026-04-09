@@ -427,6 +427,8 @@
     .toast { font-size: 12px; padding: 10px 14px; }
     .notice { font-size: 11px; }
     .auto-reply-box { font-size: 12px; }
+    .time-select-row { grid-template-columns: 1fr; }
+    .time-sep { display: none; }
     .sop-two-col { grid-template-columns: 1fr !important; }
   }
 
@@ -485,6 +487,18 @@
     transition: all 0.15s;
   }
   .photo-source-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+  .time-select-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 8px;
+    align-items: center;
+  }
+  .time-sep {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-sub);
+  }
   .photo-source-btn .psb-icon { font-size: 22px; }
 
   /* 詳細モーダル内の写真表示 */
@@ -798,7 +812,16 @@ body.staff-mode .topbar .actions a.btn { text-decoration: none; }
               </div>
               <div class="form-group">
                 <label>利用時間 <span class="req">*</span></label>
-                <input type="text" class="form-control" id="f-time" placeholder="例：14:00〜16:00">
+                <input type="hidden" id="f-time">
+                <div class="time-select-row">
+                  <select class="form-control" id="f-time-start" onchange="syncUseTime()">
+                    <option value="">開始時間を選択</option>
+                  </select>
+                  <span class="time-sep">〜</span>
+                  <select class="form-control" id="f-time-end" onchange="syncUseTime()">
+                    <option value="">終了時間を選択</option>
+                  </select>
+                </div>
               </div>
               <div class="form-group">
                 <label>予約名 <span class="req">*</span></label>
@@ -2441,6 +2464,58 @@ function handleInquiryPhoto(input) {
   input.value = '';
 }
 
+
+function buildTimeOptions(include2400 = false) {
+  const out = [];
+  for (let total = 0; total <= 24 * 60; total += 30) {
+    if (!include2400 && total === 24 * 60) continue;
+    const h = String(Math.floor(total / 60)).padStart(2, '0');
+    const m = String(total % 60).padStart(2, '0');
+    out.push(`${h}:${m}`);
+  }
+  return out;
+}
+
+function initUseTimeDropdowns() {
+  const startEl = document.getElementById('f-time-start');
+  const endEl = document.getElementById('f-time-end');
+  if (!startEl || !endEl) return;
+
+  const startOptions = buildTimeOptions(false);
+  const endOptions = buildTimeOptions(true);
+
+  startEl.innerHTML = '<option value="">開始時間を選択</option>' + startOptions.map(v => `<option value="${v}">${v}</option>`).join('');
+  endEl.innerHTML = '<option value="">終了時間を選択</option>' + endOptions.map(v => `<option value="${v}">${v}</option>`).join('');
+  syncUseTime();
+}
+
+function syncUseTime() {
+  const startEl = document.getElementById('f-time-start');
+  const endEl = document.getElementById('f-time-end');
+  const hiddenEl = document.getElementById('f-time');
+  if (!hiddenEl || !startEl || !endEl) return;
+
+  const start = (startEl.value || '').trim();
+  const end = (endEl.value || '').trim();
+
+  if (!start || !end) {
+    hiddenEl.value = '';
+    return;
+  }
+
+  const toMinutes = (hhmm) => {
+    const [h, m] = hhmm.split(':').map(Number);
+    return h * 60 + m;
+  };
+
+  if (toMinutes(end) <= toMinutes(start)) {
+    hiddenEl.value = '';
+    return;
+  }
+
+  hiddenEl.value = `${start}〜${end}`;
+}
+
 function removeInquiryPhoto() {
   document.getElementById('f-photo-preview-img').src = '';
   document.getElementById('f-photo-area').style.display = 'none';
@@ -2453,19 +2528,21 @@ function removeInquiryPhoto() {
 }
 
 function resetForm() {
-  ['f-date','f-time','f-name','f-store','f-room','f-item','f-detail','f-location','f-tel','f-email','f-urgency'].forEach(id => {
+  ['f-date','f-time','f-time-start','f-time-end','f-name','f-store','f-room','f-item','f-detail','f-location','f-tel','f-email','f-urgency'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
   ['c1','c2','c3','c4','c5'].forEach(id => document.getElementById(id).checked = false);
   removeInquiryPhoto();
+  initUseTimeDropdowns();
   updateInquiryRoomOptions('', '');
   document.getElementById('autoReplyPanel').style.display = 'none';
 }
 
 async function submitForm() {
+  syncUseTime();
   const required = [
-    { id:'f-date', label:'利用日' }, { id:'f-name', label:'予約名' },
+    { id:'f-date', label:'利用日' }, { id:'f-time', label:'利用時間' }, { id:'f-name', label:'予約名' },
     { id:'f-store', label:'店舗名' }, { id:'f-room', label:'部屋名' }, { id:'f-item', label:'忘れ物の内容' },
     { id:'f-tel', label:'電話番号' },
   ];
@@ -2856,6 +2933,7 @@ function renderPublicPage() {
 renderDashboard();
 renderSOP();
 initGasEndpointUI();
+initUseTimeDropdowns();
 const appRole = document.body.dataset.role || 'staff';
 const initialPage = appRole === 'customer' ? 'form' : 'dashboard';
 showPage(initialPage);
