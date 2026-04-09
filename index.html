@@ -562,6 +562,40 @@
   .urgency-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
   .urgency-high { background: var(--danger-bg); color: var(--danger); }
   .urgency-normal { background: var(--bg); color: var(--text-muted); }
+
+
+  /* ── Mobile quick actions ── */
+  .mobile-quick-actions { display:none; }
+  @media (max-width: 640px) {
+    .mobile-quick-actions {
+      display:flex;
+      position:fixed;
+      right:12px;
+      bottom:74px;
+      z-index:260;
+      flex-direction:column;
+      gap:8px;
+    }
+    .mq-btn {
+      border:none;
+      border-radius:999px;
+      padding:10px 14px;
+      box-shadow: var(--shadow-md);
+      font-family: inherit;
+      font-size:12px;
+      font-weight:700;
+      cursor:pointer;
+      background: var(--surface);
+      color: var(--text);
+      border:1px solid var(--border-strong);
+    }
+    .mq-btn.primary {
+      background: var(--accent);
+      color:#fff;
+      border-color: var(--accent);
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -715,53 +749,19 @@
                 <input type="text" class="form-control" id="f-name" placeholder="山田 太郎">
               </div>
               <div class="form-group">
-                <label>スタジオ名・部屋名 <span class="req">*</span></label>
-                <select class="form-control" id="f-studio">
+                <label>店舗名 <span class="req">*</span></label>
+                <select class="form-control" id="f-store" onchange="updateInquiryRoomOptions()">
                   <option value="">選択してください</option>
-
-                  <optgroup label="施設">
-                    <option>問屋町</option>
-                    <option>倉敷</option>
-                  </optgroup>
-
-                  <optgroup label="問屋町">
-                    <option>問屋町 1スタ</option>
-                    <option>問屋町 2スタ</option>
-                    <option>問屋町 3スタ</option>
-                    <option>問屋町 4スタ</option>
-                    <option>問屋町 5スタ</option>
-                    <option>問屋町 6スタ</option>
-                    <option>問屋町 7スタ</option>
-                    <option>問屋町 8スタ</option>
-                    <option>問屋町 9スタ</option>
-                    <option>問屋町 10スタ</option>
-                    <option>問屋町 11スタ</option>
-                    <option>問屋町 12スタ</option>
-                  </optgroup>
-
-                  <optgroup label="倉敷">
-                    <option>倉敷 1スタ</option>
-                    <option>倉敷 2スタ</option>
-                    <option>倉敷 3スタ</option>
-                    <option>倉敷 4スタ</option>
-                    <option>倉敷 5スタ</option>
-                    <option>倉敷 Aスタジオ</option>
-                    <option>倉敷 Bスタジオ</option>
-                    <option>倉敷 Cスタジオ</option>
-                    <option>倉敷 黄スタジオ</option>
-                    <option>倉敷 灰スタジオ</option>
-                    <option>倉敷 赤スタジオ</option>
-                    <option>倉敷 白スタジオ</option>
-                    <option>倉敷 黒スタジオ</option>
-                  </optgroup>
-
-                  <optgroup label="共用部・その他">
-                    <option>問屋町 ロビー</option>
-                    <option>倉敷 ロビー</option>
-                    <option>倉敷 更衣室A</option>
-                    <option>倉敷 更衣室B</option>
-                    <option>その他（備考へ記入）</option>
-                  </optgroup>
+                  <option>問屋町</option>
+                  <option>倉敷</option>
+                  <option>下中野</option>
+                  <option>表町</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>部屋名 <span class="req">*</span></label>
+                <select class="form-control" id="f-room">
+                  <option value="">先に店舗を選択してください</option>
                 </select>
               </div>
 
@@ -823,7 +823,7 @@
                   </label>
                   <label class="checkbox-item">
                     <input type="checkbox" id="c3">
-                    <span>保管期限は14日間であることを理解しました</span>
+                    <span>保管期限は1か月であることを理解しました</span>
                   </label>
                   <label class="checkbox-item">
                     <input type="checkbox" id="c4">
@@ -857,7 +857,7 @@
             見つかった場合も、見つからなかった場合もご連絡いたします。<br><br>
             ─────────────────────────<br>
             ＜保管に関するご注意＞<br>
-            ・保管期限：受付から <strong>14日間</strong><br>
+            ・保管期限：受付から <strong>1か月</strong><br>
             ・食品・飲料・衛生品は <strong>即日処分</strong>の場合があります<br>
             ・返却時には <strong>本人確認書類</strong>が必要です<br>
             ・貴重品の管理責任は利用者にあります<br>
@@ -1201,7 +1201,7 @@ function sendAutoReply(email, name, manageId) {
     '━━━━━━━━━━━━━━━━━━━━━',
     '■ 保管に関するご注意',
     '━━━━━━━━━━━━━━━━━━━━━',
-    '・保管期限：受付から14日間',
+    '・保管期限：受付から1か月',
     '・食品・飲料・衛生品は即日処分の場合があります',
     '・返却時には本人確認書類が必要です',
     '・貴重品の管理責任は利用者にあります',
@@ -1612,18 +1612,19 @@ function jsonResponse(obj) {
           <input type="date" class="form-control" id="m-found-date">
         </div>
         <div class="form-group">
-          <label>発見場所 <span class="req">*</span></label>
-          <select class="form-control" id="m-found-place">
-            <option>スタジオ内</option>
-            <option>コンセント周辺</option>
-            <option>出入口付近</option>
-            <option>ロビー</option>
-            <option>ソファ・椅子の下</option>
-            <option>テーブル</option>
-            <option>洗面所・トイレ</option>
-            <option>更衣室</option>
-            <option>ハンガーラック</option>
-            <option>その他</option>
+          <label>店舗名 <span class="req">*</span></label>
+          <select class="form-control" id="m-store" onchange="updateFoundRoomOptions()">
+            <option value="">選択してください</option>
+            <option>問屋町</option>
+            <option>倉敷</option>
+            <option>下中野</option>
+            <option>表町</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>部屋名 <span class="req">*</span></label>
+          <select class="form-control" id="m-room">
+            <option value="">先に店舗を選択してください</option>
           </select>
         </div>
         <div class="form-group full">
@@ -1721,6 +1722,7 @@ function jsonResponse(obj) {
     </div>
     <div class="modal-body" id="detail-body"></div>
     <div class="modal-footer">
+      <button class="btn btn-danger" id="detail-delete-btn" style="display:none;margin-right:auto;" onclick="deleteCurrentItem()">🗑️ 削除</button>
       <button class="btn btn-secondary" onclick="closeDetailModal()">閉じる</button>
       <button class="btn btn-primary" onclick="updateStatus()">ステータス更新</button>
     </div>
@@ -1749,6 +1751,10 @@ function jsonResponse(obj) {
     <span class="bn-icon">⚙️</span><span>GAS</span>
   </div>
 </nav>
+<div class="mobile-quick-actions" aria-label="モバイル操作ボタン">
+  <button class="mq-btn" onclick="loadFromGAS()">🔄 同期</button>
+  <button class="mq-btn primary" onclick="openLedgerModal()">＋ 登録</button>
+</div>
 <div class="toast-container" id="toast-container"></div>
 
 <script>
@@ -2009,12 +2015,101 @@ function filterLedger() {
 }
 
 // ── Modal: Ledger Register ──
+const STORE_ROOM_OPTIONS = {
+  '問屋町': ['1スタ','2スタ','3スタ','4スタ','5スタ','6スタ','7スタ','8スタ','Aスタ','Bスタ','3階スタジオ','1階音楽スタジオ','ロビー','更衣室','トイレ・洗面','その他'],
+  '倉敷': ['黒スタ','白スタ','灰スタ','赤スタ','黄スタ','Aスタ','Bスタ','Cスタ','Dスタ','写真スタ','メイクルーム','ロビー','更衣室','トイレ・洗面','その他'],
+  '下中野': ['部屋不明','ロビー','更衣室','トイレ・洗面','その他'],
+  '表町': ['部屋不明','ロビー','更衣室','トイレ・洗面','その他']
+};
+
+function fillRoomOptions(roomEl, store, selectedRoom) {
+  roomEl.innerHTML = '';
+  if (!store || !STORE_ROOM_OPTIONS[store]) {
+    roomEl.innerHTML = '<option value="">先に店舗を選択してください</option>';
+    roomEl.value = '';
+    return;
+  }
+
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = '選択してください';
+  roomEl.appendChild(placeholder);
+
+  STORE_ROOM_OPTIONS[store].forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    roomEl.appendChild(opt);
+  });
+
+  roomEl.value = STORE_ROOM_OPTIONS[store].includes(selectedRoom || '') ? selectedRoom : '';
+}
+
+function updateFoundRoomOptions(selectedStore, selectedRoom) {
+  const storeEl = document.getElementById('m-store');
+  const roomEl = document.getElementById('m-room');
+  const store = selectedStore !== undefined ? selectedStore : storeEl.value;
+  fillRoomOptions(roomEl, store, selectedRoom !== undefined ? selectedRoom : '');
+}
+
+function updateInquiryRoomOptions(selectedStore, selectedRoom) {
+  const storeEl = document.getElementById('f-store');
+  const roomEl = document.getElementById('f-room');
+  const store = selectedStore !== undefined ? selectedStore : storeEl.value;
+  fillRoomOptions(roomEl, store, selectedRoom !== undefined ? selectedRoom : '');
+}
+
+function splitStoreRoom(value) {
+  if (!value) return { store: '', room: '' };
+  const normalized = String(value).trim();
+  if (normalized.includes(' / ')) {
+    const [store, room] = normalized.split(' / ');
+    return { store: store || '', room: room || '' };
+  }
+  const slashMatch = normalized.match(/^(問屋町|倉敷|下中野|表町)[\s\/]+(.+)$/);
+  if (slashMatch) return { store: slashMatch[1], room: slashMatch[2] };
+  for (const [store, rooms] of Object.entries(STORE_ROOM_OPTIONS)) {
+    for (const room of rooms) {
+      const patterns = [store + ' ' + room, store + room, room];
+      if (patterns.includes(normalized)) return { store, room };
+    }
+  }
+  return { store: '', room: normalized };
+}
+
+function splitFoundPlace(place) {
+  return splitStoreRoom(place);
+}
+
+function buildStoreRoom(storeId, roomId) {
+  const store = document.getElementById(storeId).value;
+  const room = document.getElementById(roomId).value;
+  if (!store) return '';
+  return room ? `${store} / ${room}` : store;
+}
+
+function buildFoundPlace() {
+  return buildStoreRoom('m-store', 'm-room');
+}
+
+function buildInquiryStudioName() {
+  return buildStoreRoom('f-store', 'f-room');
+}
+
+function addOneMonthSlash(dateObj) {
+  const d = new Date(dateObj);
+  d.setMonth(d.getMonth() + 1);
+  return d.toISOString().slice(0,10).replace(/-/g,'/');
+}
+
 function openLedgerModal(idx) {
   editingIdx = idx !== undefined ? idx : null;
   if (editingIdx !== null) {
     const d = ledgerData[editingIdx];
     document.getElementById('m-found-date').value = d.foundDate ? d.foundDate.replace(/\//g,'-') : '';
-    document.getElementById('m-found-place').value = d.place;
+    const parsedPlace = splitFoundPlace(d.place);
+    document.getElementById('m-store').value = parsedPlace.store;
+    updateFoundRoomOptions(parsedPlace.store, parsedPlace.room);
     document.getElementById('m-item-name').value = d.item;
     document.getElementById('m-item-detail').value = d.detail;
     document.getElementById('m-contact-name').value = d.contact;
@@ -2039,7 +2134,8 @@ function openLedgerModal(idx) {
     }
   } else {
     document.getElementById('m-found-date').value = new Date().toISOString().slice(0,10);
-    document.getElementById('m-found-place').value = 'スタジオ内';
+    document.getElementById('m-store').value = '問屋町';
+    updateFoundRoomOptions('問屋町', '1スタ');
     document.getElementById('m-item-name').value = '';
     document.getElementById('m-item-detail').value = '';
     document.getElementById('m-contact-name').value = '';
@@ -2064,15 +2160,16 @@ function closeModal() { document.getElementById('ledger-modal').classList.remove
 function saveLedger() {
   const itemName = document.getElementById('m-item-name').value.trim();
   if (!itemName) { showToast('物の内容を入力してください'); return; }
+  const place = buildFoundPlace();
+  if (!place) { showToast('店舗名と部屋名を選択してください'); return; }
   const foundDateRaw = document.getElementById('m-found-date').value;
   const foundDate = foundDateRaw ? foundDateRaw.replace(/-/g,'/') : '';
-  const deadlineDate = new Date(new Date().getTime() + 14*24*60*60*1000);
-  const deadline = deadlineDate.toISOString().slice(0,10).replace(/-/g,'/');
+  const deadline = addOneMonthSlash(new Date());
 
   if (editingIdx !== null) {
     ledgerData[editingIdx] = {
       ...ledgerData[editingIdx],
-      foundDate, place: document.getElementById('m-found-place').value,
+      foundDate, place,
       item: itemName, detail: document.getElementById('m-item-detail').value,
       contact: document.getElementById('m-contact-name').value,
       returnMethod: document.getElementById('m-return-method').value,
@@ -2089,7 +2186,7 @@ function saveLedger() {
     const id = 'LF-' + today.replace(/\//g,'') + '-' + String(nextId++).padStart(3,'0');
     ledgerData.unshift({
       id, foundDate, inquiryDate: today,
-      place: document.getElementById('m-found-place').value,
+      place,
       item: itemName, detail: document.getElementById('m-item-detail').value,
       contact: document.getElementById('m-contact-name').value,
       returnMethod: document.getElementById('m-return-method').value,
@@ -2151,14 +2248,50 @@ function showDetail(idx) {
       ${d.photoData ? `<div class="detail-item full"><div class="dl">写真</div><div class="dd"><img class="detail-photo" src="${d.photoData}" alt="忘れ物写真" onclick="openLightbox('${d.photoData}')"></div></div>` : ''}
     </div>
   `;
+  const deleteBtn = document.getElementById('detail-delete-btn');
+  if (deleteBtn) deleteBtn.style.display = d.status === 'returned' ? '' : 'none';
   document.getElementById('detail-modal').classList.add('open');
 }
 
-function closeDetailModal() { document.getElementById('detail-modal').classList.remove('open'); }
+function closeDetailModal() { document.getElementById('detail-modal').classList.remove('open'); const btn=document.getElementById('detail-delete-btn'); if (btn) btn.style.display='none'; }
 
 function updateStatus() {
   closeDetailModal();
   openLedgerModal(editingIdx);
+}
+
+async function deleteCurrentItem() {
+  if (editingIdx === null || editingIdx === undefined) return;
+  const target = ledgerData[editingIdx];
+  if (!target || target.status !== 'returned') {
+    showToast('返却済みの物のみ削除できます');
+    return;
+  }
+  const ok = confirm(`返却済みデータ ${target.id} を削除します。よろしいですか？`);
+  if (!ok) return;
+
+  const targetId = target.id;
+  ledgerData.splice(editingIdx, 1);
+  editingIdx = null;
+  closeDetailModal();
+  renderDashboard();
+  renderLedger();
+  renderPublicPage();
+  const sc = ledgerData.filter(d=>d.status==='searching').length;
+  document.getElementById('pending-badge').textContent = sc;
+  const bnb = document.getElementById('bn-badge');
+  if (bnb) { bnb.textContent = sc; bnb.style.display = sc > 0 ? '' : 'none'; }
+
+  if (hasGasEndpoint()) {
+    const result = await deleteFromGAS(targetId);
+    if (result && result.success) {
+      showToast('🗑️ 削除しました');
+    } else {
+      showToast('⚠️ 画面上では削除しましたが、GAS側の削除に失敗しました');
+    }
+  } else {
+    showToast('🗑️ 削除しました');
+  }
 }
 
 // ── Form ──
@@ -2174,7 +2307,7 @@ function handlePhoto(input) {
 }
 
 function resetForm() {
-  ['f-date','f-time','f-name','f-studio','f-item','f-detail','f-location','f-tel','f-email','f-urgency'].forEach(id => {
+  ['f-date','f-time','f-name','f-store','f-room','f-item','f-detail','f-location','f-tel','f-email','f-urgency'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -2188,7 +2321,7 @@ function resetForm() {
 async function submitForm() {
   const required = [
     { id:'f-date', label:'利用日' }, { id:'f-name', label:'予約名' },
-    { id:'f-studio', label:'スタジオ名' }, { id:'f-item', label:'忘れ物の内容' },
+    { id:'f-store', label:'店舗名' }, { id:'f-room', label:'部屋名' }, { id:'f-item', label:'忘れ物の内容' },
     { id:'f-tel', label:'電話番号' },
   ];
   for (const r of required) {
@@ -2202,7 +2335,7 @@ async function submitForm() {
 
   const today = new Date().toISOString().slice(0,10).replace(/-/g,'/');
   const id = 'LF-' + today.replace(/\//g,'') + '-' + String(nextId++).padStart(3,'0');
-  const deadline = new Date(new Date().getTime()+14*24*60*60*1000).toISOString().slice(0,10).replace(/-/g,'/');
+  const deadline = addOneMonthSlash(new Date());
   const photoImg = document.querySelector('#photo-preview img');
   const inquiryPhotoData = photoImg ? photoImg.src : '';
   let inquiryPhotoUrl = '';
@@ -2219,7 +2352,7 @@ async function submitForm() {
     useDate: document.getElementById('f-date').value ? document.getElementById('f-date').value.replace(/-/g,'/') : '',
     useTime: document.getElementById('f-time').value.trim(),
     reserverName: document.getElementById('f-name').value.trim(),
-    studioName: document.getElementById('f-studio').value,
+    studioName: buildInquiryStudioName(),
     foundDate: '',
     place: '',
     item: document.getElementById('f-item').value.trim(),
@@ -2424,6 +2557,17 @@ async function saveToGAS(item) {
   } else {
     console.warn('スプレッドシート保存失敗:', result);
   }
+}
+
+async function deleteFromGAS(id) {
+  if (!hasGasEndpoint()) return null;
+  const result = await gasRequest({ action: 'deleteItem', id });
+  if (result && result.success) {
+    console.log('スプレッドシートから削除:', id);
+  } else {
+    console.warn('スプレッドシート削除失敗:', result);
+  }
+  return result;
 }
 
 // スプレッドシートから全件読み込み
