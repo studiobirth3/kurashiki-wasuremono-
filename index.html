@@ -608,6 +608,8 @@
     <div class="topbar">
       <h2 id="page-title">ダッシュボード</h2>
       <div class="actions">
+        <span id="sync-status" style="font-size:11px;color:var(--text-muted);display:none;"></span>
+        <button class="btn btn-secondary btn-sm" onclick="loadFromGAS()" title="スプレッドシートから最新データを読み込む">🔄 同期</button>
         <button class="btn btn-secondary btn-sm" onclick="showPage('form')">＋ 新規問い合わせ</button>
         <button class="btn btn-primary btn-sm" onclick="openLedgerModal()">＋ 発見品を登録</button>
       </div>
@@ -715,12 +717,50 @@
                 <label>スタジオ名・部屋名 <span class="req">*</span></label>
                 <select class="form-control" id="f-studio">
                   <option value="">選択してください</option>
-                  <option>Aスタジオ</option>
-                  <option>Bスタジオ</option>
-                  <option>Cスタジオ</option>
-                  <option>更衣室A</option>
-                  <option>更衣室B</option>
-                  <option>ロビー</option>
+
+                  <optgroup label="施設">
+                    <option>問屋町</option>
+                    <option>倉敷</option>
+                  </optgroup>
+
+                  <optgroup label="問屋町">
+                    <option>問屋町 1スタ</option>
+                    <option>問屋町 2スタ</option>
+                    <option>問屋町 3スタ</option>
+                    <option>問屋町 4スタ</option>
+                    <option>問屋町 5スタ</option>
+                    <option>問屋町 6スタ</option>
+                    <option>問屋町 7スタ</option>
+                    <option>問屋町 8スタ</option>
+                    <option>問屋町 9スタ</option>
+                    <option>問屋町 10スタ</option>
+                    <option>問屋町 11スタ</option>
+                    <option>問屋町 12スタ</option>
+                  </optgroup>
+
+                  <optgroup label="倉敷">
+                    <option>倉敷 1スタ</option>
+                    <option>倉敷 2スタ</option>
+                    <option>倉敷 3スタ</option>
+                    <option>倉敷 4スタ</option>
+                    <option>倉敷 5スタ</option>
+                    <option>倉敷 Aスタジオ</option>
+                    <option>倉敷 Bスタジオ</option>
+                    <option>倉敷 Cスタジオ</option>
+                    <option>倉敷 黄スタジオ</option>
+                    <option>倉敷 灰スタジオ</option>
+                    <option>倉敷 赤スタジオ</option>
+                    <option>倉敷 白スタジオ</option>
+                    <option>倉敷 黒スタジオ</option>
+                  </optgroup>
+
+                  <optgroup label="共用部・その他">
+                    <option>問屋町 ロビー</option>
+                    <option>倉敷 ロビー</option>
+                    <option>倉敷 更衣室A</option>
+                    <option>倉敷 更衣室B</option>
+                    <option>その他（備考へ記入）</option>
+                  </optgroup>
                 </select>
               </div>
 
@@ -959,12 +999,33 @@
           <div>以下のGASコードをGoogle Apps Scriptにコピー&ペーストすることで、Googleフォーム→スプレッドシート自動記録・LINE通知が実現できます。</div>
         </div>
 
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header"><h3>🔗 WebアプリURL設定</h3></div>
+          <div class="card-body">
+            <div class="form-grid" style="grid-template-columns:1fr auto;align-items:end;">
+              <div class="form-group full" style="grid-column:1 / -1;">
+                <label>GASウェブアプリURL（ここに貼ってください）</label>
+                <input type="url" class="form-control" id="gas-endpoint-input" placeholder="ここにGASウェブアプリURLを貼ってください（https://script.google.com/macros/s/xxxxxxxxxxxxxxxx/exec）">
+                <div style="font-size:12px;color:var(--text-sub);margin-top:6px;">Google Apps Script を <strong>ウェブアプリとしてデプロイ</strong> したURLを入れてください。保存すると、このブラウザに記憶されます。</div>
+              </div>
+              <div class="form-group">
+                <button class="btn btn-primary" type="button" onclick="saveGasEndpointSetting()">💾 URLを保存</button>
+              </div>
+              <div class="form-group">
+                <button class="btn btn-secondary" type="button" onclick="clearGasEndpointSetting()">🗑️ クリア</button>
+              </div>
+            </div>
+            <div style="margin-top:8px;font-size:12px;color:var(--warning);font-weight:700;">※ Apps Script をウェブアプリとしてデプロイした後のURLをここに貼ってください</div><div id="gas-endpoint-current" style="margin-top:10px;font-size:12px;color:var(--text-sub);"></div>
+          </div>
+        </div>
+
         <div class="tabs">
           <div class="tab active" onclick="switchGasTab(0)">フォーム連携</div>
           <div class="tab" onclick="switchGasTab(1)">LINE通知</div>
           <div class="tab" onclick="switchGasTab(2)">自動返信メール</div>
           <div class="tab" onclick="switchGasTab(3)">期限チェック</div>
           <div class="tab" onclick="switchGasTab(4)">📷 写真保存</div>
+          <div class="tab" onclick="switchGasTab(5)">🔄 台帳同期</div>
         </div>
 
         <div id="gas-tab-0" class="gas-tab card">
@@ -976,7 +1037,7 @@
 // Googleフォームの「送信時」トリガーに設定
 // ============================================
 
-const SHEET_ID = '1qkzL-6mK4J3dnYkSXP42IWqWpO_qqNxV'; // ★ 変更してください
+const SHEET_ID = 'YOUR_SPREADSHEET_ID'; // ★ 変更してください
 const SHEET_NAME = '忘れ物台帳';
 
 function onFormSubmit(e) {
@@ -1220,11 +1281,15 @@ function checkDeadlines() {
 // GASをウェブアプリとして「全員」にデプロイ
 // ============================================
 
-const DRIVE_FOLDER_ID = '1qkzL-6mK4J3dnYkSXP42IWqWpO_qqNxV'; // ★ 変更
+const SHEET_ID        = 'YOUR_SPREADSHEET_ID';  // ★ 変更：スプレッドシートのID
+const SHEET_NAME      = '忘れ物台帳';               // ★ シート名（変更不要）
+const DRIVE_FOLDER_ID = 'YOUR_DRIVE_FOLDER_ID';  // ★ 変更：ドライブフォルダのID
 
 function doPost(e) {
   try {
-    const params = JSON.parse(e.postData.contents);
+    // Content-Type: text/plain でも application/json でも対応
+    const rawBody = e.postData ? e.postData.contents : '{}';
+    const params = JSON.parse(rawBody);
     const base64 = params.imageBase64;   // "data:image/jpeg;base64,..." 形式
     const manageId = params.manageId;    // 管理番号 例: LF-20260401-001
     const mimeType = params.mimeType || 'image/jpeg';
@@ -1269,6 +1334,13 @@ function doPost(e) {
   }
 }
 
+// GETリクエスト（疎通確認用）
+function doGet(e) {
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'ok', message: '忘れ物写真アップロードAPI稼働中' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
 // ============================================
 // Webアプリとしてデプロイする手順：
 // 1. Apps Script → 「デプロイ」→「新しいデプロイ」
@@ -1286,34 +1358,194 @@ function doPost(e) {
               <div class="card-body">
                 <p style="font-size:12px;color:var(--text-sub);margin-bottom:10px;">以下のコードを lost-item-system.html の &lt;script&gt; に追加すると、写真をGASに自動送信してドライブに永続保存できます。</p>
                 <pre style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.7;overflow-x:auto;color:var(--text);">// ★ GASウェブアプリのURLに変更してください
-const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyO9Bna94DS05kmJBeZ5QR4SMwilOKyUU5b-5pi9luoHy7dQrmgbGUpbSTK5rf49Tpxug/exec';
+const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwLgJXkdgBQw3jdgHNIxY3hJYxzwosXjwSaw6ogib9krn6JgAZaj7DIs9LU2gq2c-S5JA/exec';
 
 async function uploadPhotoToGAS(manageId, base64Data) {
-  if (!GAS_ENDPOINT.includes('YOUR_SCRIPT_ID')) {
-    try {
-      const res = await fetch(GAS_ENDPOINT, {
-        method: 'POST',
-        body: JSON.stringify({
-          imageBase64: base64Data,
-          manageId: manageId,
-          mimeType: 'image/jpeg'
-        })
-      });
-      const json = await res.json();
-      if (json.success) {
-        console.log('写真をドライブに保存しました:', json.url);
-        return json.url;
-      }
-    } catch(e) {
-      console.error('写真アップロード失敗:', e);
-    }
+  // GASエンドポイント未設定の場合
+  if (!hasGasEndpoint()) {
+    showToast('⚠️ GASエンドポイント未設定。写真はブラウザ内のみ保存');
+    return null;
   }
-  return null; // GAS未設定時はBase64をローカル保持
+
+  showToast('📤 写真をGoogleドライブに送信中...');
+  try {
+    const res = await fetch(GAS_ENDPOINT, {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'text/plain' }, // GASのCORSに合わせtext/plain
+      body: JSON.stringify({
+        imageBase64: base64Data,
+        manageId: manageId,
+        mimeType: 'image/jpeg'
+      })
+    });
+    const text = await res.text();
+    let json;
+    try { json = JSON.parse(text); } catch(pe) {
+      console.error('GASレスポンスのパース失敗:', text);
+      showToast('❌ GASからの応答が不正です。デプロイ設定を確認してください');
+      return null;
+    }
+    if (json && json.success) {
+      return json.url;
+    } else {
+      showToast('❌ 保存失敗: ' + (json && json.error ? json.error : '不明なエラー'));
+      return null;
+    }
+  } catch(e) {
+    console.error('写真アップロード失敗:', e);
+    // CORSエラーの可能性が高い → GASのデプロイ設定を案内
+    if (e.name === 'TypeError' && e.message.includes('fetch')) {
+      showToast('❌ 通信エラー。GASのデプロイ設定「アクセス：全員」を確認してください');
+    } else {
+      showToast('❌ 写真アップロード失敗: ' + e.message);
+    }
+    return null;
+  }
 }
 </pre>
                 <button class="btn btn-secondary btn-sm" onclick="copyCode(5)" style="margin-top:10px;">📋 コピー</button>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div id="gas-tab-5" class="gas-tab card" style="display:none;">
+          <div class="card-header"><h3>🔄 台帳データをスプレッドシートと同期するGASコード</h3></div>
+          <div class="card-body">
+            <div class="notice info" style="margin-bottom:12px;">
+              <span class="notice-icon" style="font-size:14px;flex-shrink:0;">ℹ️</span>
+              <div style="font-size:12px;">このGASをウェブアプリとしてデプロイすると、Webアプリの登録・更新データがスプレッドシートに保存され、どの端末からでも同じデータが見られるようになります。<br><strong>写真保存のGASと同じプロジェクトに追記してください。</strong></div>
+            </div>
+            <pre style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.7;overflow-x:auto;color:var(--text);">// ============================================
+// 台帳データ同期 API
+// 写真保存GASと同じプロジェクトに追記する
+// ============================================
+
+// doPost に以下のアクションを追加（既存のdoPostを置き換え）
+function doPost(e) {
+  try {
+    const rawBody = e.postData ? e.postData.contents : '{}';
+    const params = JSON.parse(rawBody);
+    const action = params.action;
+
+    // ── 台帳：1件保存 / 更新 ──
+    if (action === 'saveItem') {
+      return saveItem(params.item);
+    }
+    // ── 台帳：全件取得 ──
+    if (action === 'getAll') {
+      return getAllItems();
+    }
+    // ── 写真アップロード（既存） ──
+    if (action === 'uploadPhoto' || params.imageBase64) {
+      return uploadPhoto(params);
+    }
+
+    return jsonResponse({ success: false, error: 'unknown action' });
+  } catch(err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+// ── 全件取得 ──
+function getAllItems() {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName(SHEET_NAME);
+  const rows = sheet.getDataRange().getValues();
+  if (rows.length <= 1) return jsonResponse({ success: true, items: [] });
+
+  const headers = rows[0];
+  const items = rows.slice(1).map(row => {
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = row[i] || '');
+    return obj;
+  });
+  return jsonResponse({ success: true, items: items });
+}
+
+// ── 1件保存 / 更新 ──
+function saveItem(item) {
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName(SHEET_NAME);
+  const rows = sheet.getDataRange().getValues();
+
+  // ヘッダー行がなければ作成
+  if (rows.length === 0) {
+    sheet.appendRow([
+      'id','inquiryDate','foundDate','place','item','detail',
+      'contact','returnMethod','urgency','status','deadline',
+      'value','publicName','boxNo','photoData','urgency'
+    ]);
+  }
+
+  // 既存行を検索（id一致）
+  for (let i = 1; i < rows.length; i++) {
+    if (rows[i][0] === item.id) {
+      // 更新
+      sheet.getRange(i + 1, 1, 1, 16).setValues([[
+        item.id, item.inquiryDate, item.foundDate, item.place,
+        item.item, item.detail, item.contact, item.returnMethod,
+        item.urgency, item.status, item.deadline,
+        item.value, item.publicName, item.boxNo, item.photoData || '', item.urgency
+      ]]);
+      return jsonResponse({ success: true, action: 'updated' });
+    }
+  }
+
+  // 新規追加
+  sheet.appendRow([
+    item.id, item.inquiryDate, item.foundDate, item.place,
+    item.item, item.detail, item.contact, item.returnMethod,
+    item.urgency, item.status, item.deadline,
+    item.value, item.publicName, item.boxNo, item.photoData || '', item.urgency
+  ]);
+  return jsonResponse({ success: true, action: 'created' });
+}
+
+// ── 写真アップロード（既存処理を関数化） ──
+function uploadPhoto(params) {
+  const base64 = params.imageBase64;
+  const manageId = params.manageId;
+  const mimeType = params.mimeType || 'image/jpeg';
+  const base64Data = base64.split(',')[1];
+  const blob = Utilities.newBlob(
+    Utilities.base64Decode(base64Data), mimeType, manageId + '.jpg'
+  );
+  const folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+  const file = folder.createFile(blob);
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  const fileUrl = 'https://drive.google.com/uc?id=' + file.getId();
+
+  // 台帳の photoData 列も更新
+  const ss = SpreadsheetApp.openById(SHEET_ID);
+  const sheet = ss.getSheetByName(SHEET_NAME);
+  const rows = sheet.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    if (rows[i][0] === manageId) {
+      sheet.getRange(i + 1, 15).setValue(fileUrl); // O列 = photoData
+      break;
+    }
+  }
+  return jsonResponse({ success: true, url: fileUrl });
+}
+
+// ── doGet：疎通確認 ──
+function doGet(e) {
+  if (e.parameter.action === 'getAll') {
+    return getAllItems();
+  }
+  return jsonResponse({ status: 'ok', message: '忘れ物管理API稼働中' });
+}
+
+// ── レスポンスヘルパー ──
+function jsonResponse(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+</pre>
+            <button class="btn btn-secondary btn-sm" onclick="copyCode(5)" style="margin-top:10px;">📋 コピー</button>
           </div>
         </div>
       </div>
@@ -1551,6 +1783,119 @@ const SOP_ITEMS = [
 ];
 let sopChecked = new Array(SOP_ITEMS.length).fill(false);
 
+// ── GAS Runtime Config ──
+const GAS_ENDPOINT_PLACEHOLDER = 'YOUR_SCRIPT_ID';
+let GAS_ENDPOINT = localStorage.getItem('lostItemGasEndpoint') || GAS_ENDPOINT_PLACEHOLDER;
+
+function getGasEndpoint() {
+  return (GAS_ENDPOINT || '').trim().replace(/\/$/, '');
+}
+
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function isValidGasEndpoint(url) {
+  return /^https:\/\/script\.google\.com\/macros\/s\/.+\/(exec|dev)$/.test((url || '').trim());
+}
+
+function hasGasEndpoint() {
+  const endpoint = getGasEndpoint();
+  return !!(endpoint && !endpoint.includes(GAS_ENDPOINT_PLACEHOLDER) && isValidGasEndpoint(endpoint));
+}
+
+function ensureGasEndpointFromInput(options = {}) {
+  if (hasGasEndpoint()) return true;
+  const input = document.getElementById('gas-endpoint-input');
+  const typed = input ? input.value.trim() : '';
+  if (isValidGasEndpoint(typed)) {
+    updateGasEndpoint(typed, { silent: options.silent !== false });
+    return true;
+  }
+  return false;
+}
+
+function updateGasEndpoint(url, options = {}) {
+  const normalized = (url || '').trim();
+  GAS_ENDPOINT = normalized || GAS_ENDPOINT_PLACEHOLDER;
+
+  if (normalized) {
+    localStorage.setItem('lostItemGasEndpoint', normalized);
+  } else {
+    localStorage.removeItem('lostItemGasEndpoint');
+  }
+
+  const input = document.getElementById('gas-endpoint-input');
+  if (input && input.value !== normalized) input.value = normalized;
+
+  const current = document.getElementById('gas-endpoint-current');
+  if (current) {
+    current.innerHTML = normalized
+      ? '現在の接続先：<code style="word-break:break-all;">' + escapeHtml(normalized) + '</code>'
+      : '現在の接続先：未設定';
+  }
+
+  if (!options.silent) {
+    showSyncStatus(normalized ? '✅ GAS URLを保存しました' : 'ℹ️ GAS URLをクリアしました');
+  }
+}
+
+function saveGasEndpointSetting() {
+  const input = document.getElementById('gas-endpoint-input');
+  const url = input ? input.value.trim() : '';
+  if (!url) {
+    showToast('⚠️ GASのURLを入力してください');
+    return;
+  }
+  if (!isValidGasEndpoint(url)) {
+    showToast('⚠️ GASのウェブアプリURLを入力してください');
+    return;
+  }
+  updateGasEndpoint(url);
+  showToast('✅ GAS URLを保存しました');
+}
+
+function clearGasEndpointSetting() {
+  updateGasEndpoint('');
+  showToast('🗑️ GAS URLをクリアしました');
+}
+
+function initGasEndpointUI() {
+  const saved = localStorage.getItem('lostItemGasEndpoint') || '';
+  updateGasEndpoint(saved, { silent: true });
+}
+
+async function uploadPhotoToGAS(manageId, base64Data) {
+  if (!ensureGasEndpointFromInput()) {
+    showToast('⚠️ GAS URL未設定。写真はブラウザ内のみ保存');
+    return null;
+  }
+
+  showToast('📤 写真をGoogleドライブに送信中...');
+  try {
+    const result = await gasRequest({
+      action: 'uploadPhoto',
+      manageId: manageId,
+      imageBase64: base64Data,
+      mimeType: (base64Data.match(/^data:(.*?);base64,/) || [])[1] || 'image/jpeg'
+    });
+
+    if (result && result.success) return result.url || '';
+
+    showToast('❌ 写真保存失敗: ' + (result && result.error ? result.error : '不明なエラー'));
+    return null;
+  } catch (e) {
+    console.error('写真アップロード失敗:', e);
+    showToast('❌ 写真アップロードに失敗しました');
+    return null;
+  }
+}
+
 // ── Pages ──
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1764,6 +2109,22 @@ function saveLedger() {
   document.getElementById('pending-badge').textContent = sc;
   const bnb2 = document.getElementById('bn-badge');
   if (bnb2) { bnb2.textContent = sc; bnb2.style.display = sc > 0 ? '' : 'none'; }
+
+  // ── GASへデータを同期 ──
+  const savedEntry = editingIdx !== null ? ledgerData[editingIdx] : ledgerData[0];
+  saveToGAS(savedEntry); // スプレッドシートに保存
+
+  // ── GASへ写真をアップロード ──
+  const photoSrc = document.getElementById('m-photo-preview').src;
+  if (photoSrc && photoSrc.startsWith('data:image')) {
+    uploadPhotoToGAS(savedEntry.id, photoSrc).then(driveUrl => {
+      if (driveUrl) {
+        // ドライブURLで photoData を上書き保存
+        savedEntry.photoData = driveUrl;
+        showToast('📷 写真をGoogleドライブに保存しました');
+      }
+    });
+  }
 }
 
 // ── Detail Modal ──
@@ -1818,10 +2179,12 @@ function resetForm() {
   });
   ['c1','c2','c3','c4','c5'].forEach(id => document.getElementById(id).checked = false);
   document.getElementById('photo-preview').innerHTML = '';
+  const photoInput = document.getElementById('f-photo');
+  if (photoInput) photoInput.value = '';
   document.getElementById('autoReplyPanel').style.display = 'none';
 }
 
-function submitForm() {
+async function submitForm() {
   const required = [
     { id:'f-date', label:'利用日' }, { id:'f-name', label:'予約名' },
     { id:'f-studio', label:'スタジオ名' }, { id:'f-item', label:'忘れ物の内容' },
@@ -1836,23 +2199,63 @@ function submitForm() {
   const allChecked = ['c1','c2','c3','c4','c5'].every(id => document.getElementById(id).checked);
   if (!allChecked) { showToast('⚠️ すべての規約にチェックを入れてください'); return; }
 
-  // 台帳に追加
   const today = new Date().toISOString().slice(0,10).replace(/-/g,'/');
   const id = 'LF-' + today.replace(/\//g,'') + '-' + String(nextId++).padStart(3,'0');
   const deadline = new Date(new Date().getTime()+14*24*60*60*1000).toISOString().slice(0,10).replace(/-/g,'/');
-  ledgerData.unshift({
-    id, foundDate:'', inquiryDate: today,
-    place: '', item: document.getElementById('f-item').value,
-    detail: document.getElementById('f-detail').value,
-    contact: document.getElementById('f-name').value,
+  const photoImg = document.querySelector('#photo-preview img');
+  const inquiryPhotoData = photoImg ? photoImg.src : '';
+  let inquiryPhotoUrl = '';
+
+  if (inquiryPhotoData && inquiryPhotoData.startsWith('data:image') && hasGasEndpoint()) {
+    inquiryPhotoUrl = await uploadPhotoToGAS(id + '-inquiry', inquiryPhotoData) || '';
+  }
+
+  const entry = {
+    id,
+    rowCreatedAt: new Date().toISOString(),
+    rowUpdatedAt: new Date().toISOString(),
+    inquiryDate: today,
+    useDate: document.getElementById('f-date').value ? document.getElementById('f-date').value.replace(/-/g,'/') : '',
+    useTime: document.getElementById('f-time').value.trim(),
+    reserverName: document.getElementById('f-name').value.trim(),
+    studioName: document.getElementById('f-studio').value,
+    foundDate: '',
+    place: '',
+    item: document.getElementById('f-item').value.trim(),
+    detail: document.getElementById('f-detail').value.trim(),
+    inquiryLocation: document.getElementById('f-location').value.trim(),
+    inquiryPhotoUrl,
+    contact: document.getElementById('f-name').value.trim(),
+    contactTel: document.getElementById('f-tel').value.trim(),
+    contactEmail: document.getElementById('f-email').value.trim(),
     returnMethod: 'pending',
     urgency: document.getElementById('f-urgency').value,
-    status: 'searching', deadline,
-  });
+    status: 'searching',
+    deadline,
+    value: 'cheap',
+    publicName: '',
+    boxNo: '',
+    photoData: '',
+    terms1: document.getElementById('c1').checked ? 'TRUE' : 'FALSE',
+    terms2: document.getElementById('c2').checked ? 'TRUE' : 'FALSE',
+    terms3: document.getElementById('c3').checked ? 'TRUE' : 'FALSE',
+    terms4: document.getElementById('c4').checked ? 'TRUE' : 'FALSE',
+    terms5: document.getElementById('c5').checked ? 'TRUE' : 'FALSE'
+  };
+
+  ledgerData.unshift(entry);
+
   const sc2 = ledgerData.filter(d=>d.status==='searching').length;
   document.getElementById('pending-badge').textContent = sc2;
   const bnb3 = document.getElementById('bn-badge');
   if (bnb3) { bnb3.textContent = sc2; bnb3.style.display = sc2 > 0 ? '' : 'none'; }
+
+  renderDashboard();
+  renderLedger();
+
+  if (hasGasEndpoint()) {
+    await saveToGAS(entry);
+  }
 
   document.getElementById('autoReplyPanel').style.display = 'block';
   document.getElementById('autoReplyPanel').scrollIntoView({ behavior:'smooth' });
@@ -1977,6 +2380,175 @@ function openLightbox(src) {
   document.body.appendChild(lb);
 }
 
+
+// ══════════════════════════════════════════
+// GAS同期機能
+// ══════════════════════════════════════════
+
+// GASへのGETリクエスト（読み込み用）
+async function gasRequestGet(params = {}) {
+  if (!ensureGasEndpointFromInput()) {
+    return { success:false, error:'GAS URL未設定' };
+  }
+
+  try {
+    const endpoint = new URL(getGasEndpoint());
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        endpoint.searchParams.set(key, value);
+      }
+    });
+    endpoint.searchParams.set('_ts', String(Date.now()));
+
+    const res = await fetch(endpoint.toString(), {
+      method: 'GET',
+      mode: 'cors',
+      redirect: 'follow',
+      cache: 'no-store'
+    });
+
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch (parseError) {
+      return {
+        success: false,
+        error: 'GASからJSON以外が返りました',
+        status: res.status,
+        rawText: text.slice(0, 300)
+      };
+    }
+  } catch (e) {
+    console.error('GAS GET通信エラー:', e);
+    return { success:false, error:'GAS GET通信エラー: ' + (e && e.message ? e.message : e) };
+  }
+}
+
+// GASへのPOSTリクエスト（保存用）
+async function gasRequest(payload) {
+  if (!ensureGasEndpointFromInput()) {
+    return { success:false, error:'GAS URL未設定' };
+  }
+  try {
+    const res = await fetch(getGasEndpoint(), {
+      method: 'POST',
+      mode: 'cors',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch(parseError) {
+      return {
+        success: false,
+        error: 'GASからJSON以外が返りました',
+        status: res.status,
+        rawText: text.slice(0, 300)
+      };
+    }
+  } catch(e) {
+    console.error('GAS通信エラー:', e);
+    return { success:false, error:'GAS通信エラー: ' + (e && e.message ? e.message : e) };
+  }
+}
+
+// 1件をスプレッドシートに保存
+async function saveToGAS(item) {
+  if (!hasGasEndpoint()) return;
+
+  const payloadItem = { ...item };
+  if (payloadItem.photoData && /^data:image/i.test(payloadItem.photoData)) {
+    payloadItem.photoData = '';
+  }
+  if (payloadItem.inquiryPhotoUrl && /^data:image/i.test(payloadItem.inquiryPhotoUrl)) {
+    payloadItem.inquiryPhotoUrl = '';
+  }
+  payloadItem.rowUpdatedAt = new Date().toISOString();
+  if (!payloadItem.rowCreatedAt) payloadItem.rowCreatedAt = payloadItem.rowUpdatedAt;
+
+  const result = await gasRequest({ action: 'saveItem', item: payloadItem });
+  if (result && result.success) {
+    console.log('スプレッドシートに保存:', result.action, payloadItem.id);
+  } else {
+    console.warn('スプレッドシート保存失敗:', result);
+  }
+}
+
+// スプレッドシートから全件読み込み
+async function loadFromGAS() {
+  if (!ensureGasEndpointFromInput({ silent: true })) {
+    showSyncStatus('⚠️ GAS未設定：GASウェブアプリURLを保存してください');
+    return;
+  }
+  showSyncStatus('🔄 スプレッドシートから読み込み中...');
+  const result = await gasRequestGet({ action: 'getAll' });
+  if (result && result.success && Array.isArray(result.items) && result.items.length > 0) {
+    ledgerData = result.items.map(row => ({
+      id:             row.id || '',
+      rowCreatedAt:   row.rowCreatedAt || '',
+      rowUpdatedAt:   row.rowUpdatedAt || '',
+      inquiryDate:    row.inquiryDate || '',
+      useDate:        row.useDate || '',
+      useTime:        row.useTime || '',
+      reserverName:   row.reserverName || '',
+      studioName:     row.studioName || '',
+      foundDate:      row.foundDate || '',
+      place:          row.place || '',
+      item:           row.item || '',
+      detail:         row.detail || '',
+      inquiryLocation:row.inquiryLocation || '',
+      inquiryPhotoUrl:row.inquiryPhotoUrl || '',
+      contact:        row.contact || '',
+      contactTel:     row.contactTel || '',
+      contactEmail:   row.contactEmail || '',
+      returnMethod:   row.returnMethod || 'pending',
+      urgency:        row.urgency || 'normal',
+      status:         row.status || 'searching',
+      deadline:       row.deadline || '',
+      value:          row.value || 'cheap',
+      publicName:     row.publicName || '',
+      boxNo:          row.boxNo || '',
+      photoData:      row.photoData || '',
+      terms1:         row.terms1 || '',
+      terms2:         row.terms2 || '',
+      terms3:         row.terms3 || '',
+      terms4:         row.terms4 || '',
+      terms5:         row.terms5 || '',
+    })).filter(d => d.id);
+    const nums = ledgerData.map(d => {
+      const m = d.id.match(/(\d+)$/);
+      return m ? parseInt(m[1]) : 0;
+    });
+    nextId = Math.max(...nums, 0) + 1;
+    renderDashboard();
+    renderLedger();
+    showSyncStatus('✅ ' + ledgerData.length + '件を読み込みました');
+  } else if (result && result.success && Array.isArray(result.items) && result.items.length === 0) {
+    ledgerData = [];
+    renderDashboard();
+    renderLedger();
+    showSyncStatus('✅ スプレッドシートに登録データなし');
+  } else {
+    const detail = result && result.error ? ' / ' + result.error : '';
+    const raw = result && result.rawText ? ' / 返答: ' + String(result.rawText).slice(0, 80) : '';
+    showSyncStatus('❌ 読み込み失敗' + detail + raw);
+    console.error('loadFromGAS failed:', result);
+  }
+}
+
+// 同期ステータス表示
+function showSyncStatus(msg) {
+  const el = document.getElementById('sync-status');
+  if (el) {
+    el.textContent = msg;
+    el.style.display = '';
+    setTimeout(() => { el.style.display = 'none'; }, 4000);
+  }
+  showToast(msg);
+}
+
 // ── Toggle box number field ──
 function toggleBoxNo() {
   const v = document.getElementById('m-value').value;
@@ -2038,6 +2610,9 @@ function renderPublicPage() {
 // ── Init ──
 renderDashboard();
 renderSOP();
+initGasEndpointUI();
+// 起動時にスプレッドシートから読み込み
+loadFromGAS();
 </script>
 </body>
 </html>
