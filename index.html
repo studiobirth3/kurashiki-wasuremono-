@@ -542,6 +542,11 @@
   .pub-hero h1 { font-size:18px; font-weight:700; margin-bottom:4px; }
   .pub-hero p  { font-size:12px; opacity:.85; }
   .pub-content { max-width:640px; margin:0 auto; padding:20px 16px 60px; }
+
+  #public-list-top { scroll-margin-top: 72px; }
+  @media(max-width:640px){
+    #public-list-top { scroll-margin-top: 64px; }
+  }
   .pub-filter  { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
 
   .pub-store-tabs { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 12px; }
@@ -905,7 +910,7 @@ body.customer-mode .pub-close-btn::after { content: ''; }
         <div style="font-size:15px;font-weight:700;">まずは保管中の忘れ物一覧をご確認ください</div>
         <div style="font-size:12px;color:var(--text-sub);margin-top:4px;">心当たりのある物が見つからない場合も、そのままフォームからお問い合わせいただけます。</div>
       </div>
-      <a class="btn btn-primary" href="#public-page" onclick="scrollToPublicList(event)">👁️ 公開一覧へ移動</a>
+      <a class="btn btn-primary" href="#public-list-top">👁️ 公開一覧へ移動</a>
     </div>
   </div>
   <div class="notice info" style="margin-bottom:20px;">
@@ -1766,6 +1771,7 @@ function jsonResponse(obj) {
 
 <!-- 公開ページ（お客さん向け） -->
 <div id="public-page">
+  <div id="public-list-top"></div>
   <div class="pub-hero">
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <div>
