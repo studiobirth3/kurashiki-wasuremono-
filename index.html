@@ -905,7 +905,7 @@ body.customer-mode .pub-close-btn::after { content: ''; }
         <div style="font-size:15px;font-weight:700;">まずは保管中の忘れ物一覧をご確認ください</div>
         <div style="font-size:12px;color:var(--text-sub);margin-top:4px;">心当たりのある物が見つからない場合も、そのままフォームからお問い合わせいただけます。</div>
       </div>
-      <button class="btn btn-primary" type="button" onclick="openPublicPage()">👁️ 公開一覧へ移動</button>
+      <a class="btn btn-primary" href="#public-page" onclick="scrollToPublicList(event)">👁️ 公開一覧へ移動</a>
     </div>
   </div>
   <div class="notice info" style="margin-bottom:20px;">
@@ -3121,6 +3121,28 @@ function setPublicStoreFilter(store, syncSelect = true) {
     if (sel) sel.value = publicStoreFilter;
   }
   renderPublicPage();
+}
+
+
+function scrollToPublicList(event) {
+  if (event) event.preventDefault();
+  renderPublicPage();
+  const page = document.getElementById('public-page');
+  if (!page) return;
+  page.classList.add('open');
+  const rect = page.getBoundingClientRect();
+  const targetY = window.pageYOffset + rect.top - 12;
+  try {
+    window.scrollTo({ top: Math.max(targetY, 0), behavior: 'smooth' });
+  } catch (e) {
+    window.scrollTo(0, Math.max(targetY, 0));
+  }
+  page.style.outline = '2px solid rgba(45,90,61,0.25)';
+  page.style.outlineOffset = '4px';
+  setTimeout(() => {
+    page.style.outline = '';
+    page.style.outlineOffset = '';
+  }, 1200);
 }
 
 function openPublicPage() {
