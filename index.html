@@ -527,6 +527,14 @@
     background:var(--bg); overflow-y:auto;
   }
   #public-page.open { display:block; }
+  body.customer-mode #public-page {
+    display:block; position:static; inset:auto; z-index:auto;
+    background:transparent; overflow:visible; margin-top:20px;
+  }
+  body.customer-mode #public-page.open { display:block; }
+  body.customer-mode .pub-close-btn { display:none !important; }
+  body.customer-mode .pub-hero { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+  body.customer-mode .pub-content { padding-bottom: 20px; }
   .pub-hero {
     background:var(--accent); color:#fff;
     padding:24px 20px 20px;
@@ -897,7 +905,7 @@ body.customer-mode .pub-close-btn::after { content: ''; }
         <div style="font-size:15px;font-weight:700;">まずは保管中の忘れ物一覧をご確認ください</div>
         <div style="font-size:12px;color:var(--text-sub);margin-top:4px;">心当たりのある物が見つからない場合も、そのままフォームからお問い合わせいただけます。</div>
       </div>
-      <button class="btn btn-primary" type="button" onclick="openPublicPage()">👁️ 公開一覧を見る</button>
+      <button class="btn btn-primary" type="button" onclick="openPublicPage()">👁️ 公開一覧へ移動</button>
     </div>
   </div>
   <div class="notice info" style="margin-bottom:20px;">
@@ -1795,7 +1803,7 @@ function jsonResponse(obj) {
       <button class="btn btn-primary" onclick="closePublicPage();showPage('form');">📝 問い合わせフォームへ</button>
     </div>
   </div>
-  <button class="pub-close-btn" onclick="closePublicPage()">✕ 閉じる（スタッフ画面）</button>
+  <button class="pub-close-btn" onclick="closePublicPage()">✕ 閉じる</button>
 </div>
 
 <!-- 台帳登録モーダル -->
@@ -3117,10 +3125,21 @@ function setPublicStoreFilter(store, syncSelect = true) {
 
 function openPublicPage() {
   renderPublicPage();
-  document.getElementById('public-page').classList.add('open');
+  const page = document.getElementById('public-page');
+  if (document.body.classList.contains('customer-mode')) {
+    page.classList.add('open');
+    page.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
+  page.classList.add('open');
 }
 function closePublicPage() {
-  document.getElementById('public-page').classList.remove('open');
+  const page = document.getElementById('public-page');
+  if (document.body.classList.contains('customer-mode')) {
+    page.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
+  page.classList.remove('open');
 }
 function renderPublicPage() {
   const search = (document.getElementById('pub-search').value || '').toLowerCase();
