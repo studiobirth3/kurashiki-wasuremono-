@@ -2580,18 +2580,25 @@ function showDetail(idx) {
     <div class="detail-grid">
       <div class="detail-item"><div class="dl">ステータス</div><div class="dd"><span class="tag ${statusClass[d.status]}">${statusLabel[d.status]}</span></div></div>
       <div class="detail-item"><div class="dl">緊急性</div><div class="dd"><span class="urgency-badge ${d.urgency==='high'?'urgency-high':'urgency-normal'}">${urgencyLabel[d.urgency]}</span></div></div>
-      <div class="detail-item"><div class="dl">受付日</div><div class="dd">${d.inquiryDate}</div></div>
-      <div class="detail-item"><div class="dl">発見日</div><div class="dd">${d.foundDate||'未発見'}</div></div>
-      <div class="detail-item full"><div class="dl">物の内容</div><div class="dd">${d.item}</div></div>
+      <div class="detail-item"><div class="dl">受付日</div><div class="dd">${d.inquiryDate||'-'}</div></div>
+      <div class="detail-item"><div class="dl">利用日</div><div class="dd">${d.useDate||'-'}</div></div>
+      <div class="detail-item"><div class="dl">利用時間</div><div class="dd">${d.useTime||'-'}</div></div>
+      <div class="detail-item"><div class="dl">店舗・部屋</div><div class="dd">${d.studioName||'-'}</div></div>
+      <div class="detail-item full"><div class="dl">予約名</div><div class="dd">${d.reserverName||d.contact||'-'}</div></div>
+      <div class="detail-item"><div class="dl">電話番号</div><div class="dd"><a href="tel:${d.contactTel||''}" style="color:var(--accent);font-weight:700;">${d.contactTel||'-'}</a></div></div>
+      <div class="detail-item"><div class="dl">メールアドレス</div><div class="dd" style="word-break:break-all;">${d.contactEmail||'-'}</div></div>
+      <div class="detail-item full"><div class="dl">忘れ物の内容</div><div class="dd">${d.item}</div></div>
       <div class="detail-item full"><div class="dl">特徴・詳細</div><div class="dd">${d.detail||'-'}</div></div>
+      <div class="detail-item full"><div class="dl">置いた可能性が高い場所</div><div class="dd">${d.inquiryLocation||'-'}</div></div>
+      <div class="detail-item"><div class="dl">発見日</div><div class="dd">${d.foundDate||'未発見'}</div></div>
       <div class="detail-item"><div class="dl">発見場所</div><div class="dd">${d.place||'-'}</div></div>
-      <div class="detail-item"><div class="dl">返却方法</div><div class="dd">${returnLabel[d.returnMethod]}</div></div>
-      <div class="detail-item"><div class="dl">問い合わせ者</div><div class="dd">${d.contact||'-'}</div></div>
-      <div class="detail-item"><div class="dl">保管期限</div><div class="dd" style="font-family:'DM Mono',monospace;">${d.deadline}</div></div>
+      <div class="detail-item"><div class="dl">返却方法</div><div class="dd">${returnLabel[d.returnMethod]||'-'}</div></div>
+      <div class="detail-item"><div class="dl">保管期限</div><div class="dd" style="font-family:'DM Mono',monospace;">${d.deadline||'-'}</div></div>
       <div class="detail-item"><div class="dl">価値区分</div><div class="dd"><span class="tag ${valueClass[d.value||'cheap']}">${valueLabel[d.value||'cheap']}</span></div></div>
       <div class="detail-item"><div class="dl">公開表示名</div><div class="dd">${d.publicName||'-'}</div></div>
       <div class="detail-item"><div class="dl">ボックス番号</div><div class="dd">${d.boxNo||'-'}</div></div>
-      ${d.photoData ? `<div class="detail-item full"><div class="dl">写真</div><div class="dd detail-photo-wrap"><img class="detail-photo" src="${getDisplayPhotoUrl(d.photoData)}" data-fallback="${getDisplayPhotoFallbackUrl(d.photoData)}" alt="忘れ物写真" onclick="openLightbox('${getDisplayPhotoUrl(d.photoData)}')" onerror="handleDetailPhotoError(this)"><div class="detail-photo-note">プレビューできない場合は、下のボタンから写真を開いてください。</div><div class="detail-photo-actions"><button class="photo-action-btn" onclick="openLightbox('${getDisplayPhotoUrl(d.photoData)}');event.stopPropagation();">拡大表示</button><button class="photo-action-btn" onclick="openPhotoInNewTab('${getPhotoOpenUrl(d.photoData)}', event)">別タブで開く</button></div></div></div>` : ''}
+      ${d.inquiryPhotoUrl ? `<div class="detail-item full"><div class="dl">📷 お客さんの問い合わせ写真</div><div class="dd detail-photo-wrap"><img class="detail-photo" src="${getDisplayPhotoUrl(d.inquiryPhotoUrl)}" data-fallback="${getDisplayPhotoFallbackUrl(d.inquiryPhotoUrl)}" alt="問い合わせ写真" onclick="openLightbox('${getDisplayPhotoUrl(d.inquiryPhotoUrl)}')" onerror="handleDetailPhotoError(this)"><div class="detail-photo-note">プレビューできない場合は、下のボタンから写真を開いてください。</div><div class="detail-photo-actions"><button class="photo-action-btn" onclick="openLightbox('${getDisplayPhotoUrl(d.inquiryPhotoUrl)}');event.stopPropagation();">拡大表示</button><button class="photo-action-btn" onclick="openPhotoInNewTab('${getPhotoOpenUrl(d.inquiryPhotoUrl)}', event)">別タブで開く</button></div></div></div>` : ''}
+      ${d.photoData ? `<div class="detail-item full"><div class="dl">📷 台帳写真</div><div class="dd detail-photo-wrap"><img class="detail-photo" src="${getDisplayPhotoUrl(d.photoData)}" data-fallback="${getDisplayPhotoFallbackUrl(d.photoData)}" alt="台帳写真" onclick="openLightbox('${getDisplayPhotoUrl(d.photoData)}')" onerror="handleDetailPhotoError(this)"><div class="detail-photo-note">プレビューできない場合は、下のボタンから写真を開いてください。</div><div class="detail-photo-actions"><button class="photo-action-btn" onclick="openLightbox('${getDisplayPhotoUrl(d.photoData)}');event.stopPropagation();">拡大表示</button><button class="photo-action-btn" onclick="openPhotoInNewTab('${getPhotoOpenUrl(d.photoData)}', event)">別タブで開く</button></div></div></div>` : ''}
     </div>
   `;
   const deleteBtn = document.getElementById('detail-delete-btn');
