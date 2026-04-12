@@ -1982,6 +1982,17 @@ function getGasEndpoint() {
   return (GAS_ENDPOINT || '').trim();
 }
 
+// 電話番号の先頭0復元（スプレッドシートが数値として保存した場合の対応）
+function normalizePhone(val) {
+  if (!val) return '';
+  const s = String(val).trim();
+  // 10桁で0始まりでない場合（例: 9012345678）→先頭に0を付与
+  if (/^[789]\d{9}$/.test(s)) return '0' + s;
+  // 11桁で0始まりでない場合（例: 08012345678 など）
+  if (/^[789]\d{10}$/.test(s)) return '0' + s;
+  return s;
+}
+
 function escapeHtml(str) {
   return String(str || '')
     .replace(/&/g, '&amp;')
@@ -2356,7 +2367,7 @@ function openLedgerModal(idx) {
   editingIdx = idx !== undefined ? idx : null;
   if (editingIdx !== null) {
     const d = ledgerData[editingIdx];
-    document.getElementById('m-found-date').value = d.foundDate ? d.foundDate.replace(/\//g,'-') : '';
+    document.getElementById('m-found-date').value = d.foundDate ? d.foundDate.replace(/\//g,'-').slice(0,10) : '';
     const parsedPlace = splitFoundPlace(d.place);
     document.getElementById('m-store').value = parsedPlace.store;
     updateFoundRoomOptions(parsedPlace.store, parsedPlace.room);
@@ -3025,19 +3036,19 @@ async function loadFromGAS() {
       id:             row.id || '',
       rowCreatedAt:   row.rowCreatedAt || '',
       rowUpdatedAt:   row.rowUpdatedAt || '',
-      inquiryDate:    row.inquiryDate || '',
-      useDate:        row.useDate || '',
+      inquiryDate:    (row.inquiryDate ? String(row.inquiryDate).replace(/\//g,'-').slice(0,10) : ''),
+      useDate:        (row.useDate ? String(row.useDate).replace(/\//g,'-').slice(0,10) : ''),
       useTime:        row.useTime || '',
       reserverName:   row.reserverName || '',
       studioName:     row.studioName || '',
-      foundDate:      row.foundDate || '',
+      foundDate:      (row.foundDate ? String(row.foundDate).replace(/\//g,'-').slice(0,10) : ''),
       place:          row.place || '',
       item:           row.item || '',
       detail:         row.detail || '',
       inquiryLocation:row.inquiryLocation || '',
       inquiryPhotoUrl:row.inquiryPhotoUrl || '',
       contact:        row.contact || '',
-      contactTel:     row.contactTel || '',
+      contactTel:     normalizePhone(row.contactTel),
       contactEmail:   row.contactEmail || '',
       returnMethod:   row.returnMethod || 'pending',
       urgency:        row.urgency || 'normal',
