@@ -2440,6 +2440,9 @@ function openLedgerModal(idx) {
     document.getElementById('m-photo-area').style.display = 'none';
     document.getElementById('m-photo-area').classList.remove('has-photo');
     document.getElementById('m-photo-source-row').style.display = '';
+    // 新規登録時はお客さん情報を非表示
+    const inqInfoNew = document.getElementById('m-inquiry-info');
+    if (inqInfoNew) inqInfoNew.style.display = 'none';
   }
   document.getElementById('ledger-modal').classList.add('open');
   updateActionVisibility(getCurrentPageName());
