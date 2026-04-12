@@ -910,7 +910,7 @@ body.customer-mode .pub-close-btn::after { content: ''; }
         <div style="font-size:15px;font-weight:700;">まずは保管中の忘れ物一覧をご確認ください</div>
         <div style="font-size:12px;color:var(--text-sub);margin-top:4px;">心当たりのある物が見つからない場合も、そのままフォームからお問い合わせいただけます。</div>
       </div>
-      <a class="btn btn-primary" href="#public-list-top" onclick="return scrollToPublicList(event)">👁️ 公開一覧へ移動</a>
+      <a class="btn btn-primary" href="#public-list-top" onclick="return scrollToPublicList(event)">👁️ 公開一覧を見る</a>
     </div>
   </div>
   <div class="notice info" style="margin-bottom:20px;">
@@ -1777,6 +1777,7 @@ function jsonResponse(obj) {
       <div>
         <h1>📦 お忘れ物のご確認</h1>
         <p>現在保管中の忘れ物一覧です。ご自身の忘れ物がある場合は下記をご確認ください。</p>
+        <div id="public-count" style="margin-top:8px;font-size:12px;opacity:.95;"></div>
       </div>
     </div>
   </div>
@@ -3193,6 +3194,11 @@ function renderPublicPage() {
   });
 
   const list = document.getElementById('pub-list');
+  const countEl = document.getElementById('public-count');
+  if (countEl) {
+    const storeLabel = publicStoreFilter ? `${publicStoreFilter} / ` : '';
+    countEl.textContent = `${storeLabel}表示件数：${visible.length}件`;
+  }
   if (!visible.length) {
     const storeLabel = publicStoreFilter ? `「${publicStoreFilter}」で` : '';
     list.innerHTML = `<div class="empty-state"><div class="emoji">📭</div><p>${storeLabel}現在保管中の忘れ物はありません</p></div>`;
@@ -3235,7 +3241,21 @@ function renderPublicPage() {
 }
 
 
+
+function setupCustomerPublicSection() {
+  if (!document.body.classList.contains('customer-mode')) return;
+  const content = document.querySelector('.content');
+  const formPage = document.getElementById('page-form');
+  const publicPage = document.getElementById('public-page');
+  if (!content || !formPage || !publicPage) return;
+  if (content.firstElementChild !== publicPage) {
+    content.insertBefore(publicPage, formPage);
+  }
+  publicPage.classList.add('open');
+}
+
 // ── Init ──
+setupCustomerPublicSection();
 renderDashboard();
 renderSOP();
 initGasEndpointUI();
