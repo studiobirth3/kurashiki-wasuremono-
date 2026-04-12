@@ -2095,7 +2095,6 @@ function showPage(name) {
   if (name === 'dashboard') renderDashboard();
   if (name === 'ledger') renderLedger();
   if (name === 'sop') renderSOP();
-  if (name === 'form') renderPublicPage();
 
   updateActionVisibility(name);
 
@@ -2228,7 +2227,7 @@ function renderLedger(filtered) {
         </div>
         <div class="ledger-card-actions">
           <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();showDetail(${idx})">詳細を見る</button>
-          ${d.photoData ? `<button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();openLightbox('${getDisplayPhotoUrl(d.photoData)}')">写真を見る</button>` : ''}
+          ${d.photoData ? `<button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();openLightbox('${getDisplayPhotoUrl(photoSrc)}')">写真を見る</button>` : ''}
         </div>
       </div>`;
     }).join('') : `<div class="empty-state"><div class="emoji">📦</div><p>該当する忘れ物はありません</p></div>`;
@@ -2573,7 +2572,7 @@ function showDetail(idx) {
       <div class="detail-item"><div class="dl">価値区分</div><div class="dd"><span class="tag ${valueClass[d.value||'cheap']}">${valueLabel[d.value||'cheap']}</span></div></div>
       <div class="detail-item"><div class="dl">公開表示名</div><div class="dd">${d.publicName||'-'}</div></div>
       <div class="detail-item"><div class="dl">ボックス番号</div><div class="dd">${d.boxNo||'-'}</div></div>
-      ${d.photoData ? `<div class="detail-item full"><div class="dl">写真</div><div class="dd detail-photo-wrap"><img class="detail-photo" src="${getDisplayPhotoUrl(d.photoData)}" data-fallback="${getDisplayPhotoFallbackUrl(d.photoData)}" alt="忘れ物写真" onclick="openLightbox('${getDisplayPhotoUrl(d.photoData)}')" onerror="handleDetailPhotoError(this)"><div class="detail-photo-note">プレビューできない場合は、下のボタンから写真を開いてください。</div><div class="detail-photo-actions"><button class="photo-action-btn" onclick="openLightbox('${getDisplayPhotoUrl(d.photoData)}');event.stopPropagation();">拡大表示</button><button class="photo-action-btn" onclick="openPhotoInNewTab('${getPhotoOpenUrl(d.photoData)}', event)">別タブで開く</button></div></div></div>` : ''}
+      ${d.photoData ? `<div class="detail-item full"><div class="dl">写真</div><div class="dd detail-photo-wrap"><img class="detail-photo" src="${getDisplayPhotoUrl(d.photoData)}" data-fallback="${getDisplayPhotoFallbackUrl(d.photoData)}" alt="忘れ物写真" onclick="openLightbox('${getDisplayPhotoUrl(photoSrc)}')" onerror="handleDetailPhotoError(this)"><div class="detail-photo-note">プレビューできない場合は、下のボタンから写真を開いてください。</div><div class="detail-photo-actions"><button class="photo-action-btn" onclick="openLightbox('${getDisplayPhotoUrl(photoSrc)}');event.stopPropagation();">拡大表示</button><button class="photo-action-btn" onclick="openPhotoInNewTab('${getPhotoOpenUrl(photoSrc)}', event)">別タブで開く</button></div></div></div>` : ''}
     </div>
   `;
   const deleteBtn = document.getElementById('detail-delete-btn');
@@ -3080,8 +3079,11 @@ function closePublicPage() {
   document.getElementById('public-page').classList.remove('open');
 }
 function renderPublicPage() {
-  const search = (document.getElementById('pub-search').value || '').toLowerCase();
-  const filterVal = document.getElementById('pub-filter-value').value;
+  const searchEl = document.getElementById('pub-search');
+  const valueEl = document.getElementById('pub-filter-value');
+  if (!list) return;
+  const search = ((searchEl && searchEl.value) || '').toLowerCase();
+  const filterVal = (valueEl && valueEl.value) || '';
 
   const visible = ledgerData.filter(d => {
     if (d.status === 'returned' || d.status === 'disposed') return false;
@@ -3091,7 +3093,6 @@ function renderPublicPage() {
     return true;
   });
 
-  const list = document.getElementById('pub-list');
   if (!visible.length) {
     list.innerHTML = '<div class="empty-state"><div class="emoji">📭</div><p>現在保管中の忘れ物はありません</p></div>';
     return;
@@ -3102,13 +3103,13 @@ function renderPublicPage() {
     const tagHtml = isCheap
       ? '<span class="tag tag-cheap">安価</span>'
       : '<span class="tag tag-valuable">高価</span>';
-    const publicPhoto = d.photoData || d.inquiryPhotoUrl || '';
-    const photoHtml = isCheap && publicPhoto ? `
+    const photoSrc = d.photoData || d.inquiryPhotoUrl || '';
+    const photoHtml = isCheap && photoSrc ? `
       <div class="pub-photo-row">
-        ${renderThumbOnly(publicPhoto, d.publicName || d.item || '忘れ物', 'pub-thumb')}
+        ${renderThumbOnly(photoSrc, d.publicName || d.item, 'pub-thumb')}
         <div class="pub-photo-actions">
-          <button class="photo-action-btn" onclick="openLightbox('${getDisplayPhotoUrl(publicPhoto)}');event.stopPropagation();">写真を拡大</button>
-          <button class="photo-action-btn" onclick="openPhotoInNewTab('${getPhotoOpenUrl(publicPhoto)}', event)">別タブで開く</button>
+          <button class="photo-action-btn" onclick="openLightbox('${getDisplayPhotoUrl(photoSrc)}');event.stopPropagation();">写真を拡大</button>
+          <button class="photo-action-btn" onclick="openPhotoInNewTab('${getPhotoOpenUrl(photoSrc)}', event)">別タブで開く</button>
           <div class="pub-photo-note">写真が開きにくい場合は「別タブで開く」をお試しください。</div>
         </div>
       </div>` : '';
@@ -3120,7 +3121,7 @@ function renderPublicPage() {
     <div class="pub-card">
       <div class="pub-card-head">
         <div>
-          <div class="pub-item-name">${d.publicName || d.item || '忘れ物'}</div>
+          <div class="pub-item-name">${d.publicName || d.item}</div>
           <div class="pub-meta">発見日：${d.foundDate || '確認中'}</div>
         </div>
         ${tagHtml}
@@ -3144,12 +3145,6 @@ showPage(initialPage);
 if (appRole !== 'customer' || hasGasEndpoint()) {
   loadFromGAS();
 }
-
-window.addEventListener('load', () => {
-  if (location.hash === '#public-list-top') {
-    setTimeout(() => { scrollToPublicList(); }, 100);
-  }
-});
 
 </script>
 </body>
