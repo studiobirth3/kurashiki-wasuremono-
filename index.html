@@ -910,7 +910,7 @@ body.customer-mode .pub-close-btn::after { content: ''; }
         <div style="font-size:15px;font-weight:700;">まずは保管中の忘れ物一覧をご確認ください</div>
         <div style="font-size:12px;color:var(--text-sub);margin-top:4px;">心当たりのある物が見つからない場合も、そのままフォームからお問い合わせいただけます。</div>
       </div>
-      <a class="btn btn-primary" href="#public-list-top" onclick="return scrollToPublicList(event)">👁️ 公開一覧を見る</a>
+      <a class="btn btn-primary" href="#public-list-top" onclick="scrollToPublicList(event)">👁️ 公開一覧へ移動</a>
     </div>
   </div>
   <div class="notice info" style="margin-bottom:20px;">
@@ -1777,7 +1777,6 @@ function jsonResponse(obj) {
       <div>
         <h1>📦 お忘れ物のご確認</h1>
         <p>現在保管中の忘れ物一覧です。ご自身の忘れ物がある場合は下記をご確認ください。</p>
-        <div id="public-count" style="margin-top:8px;font-size:12px;opacity:.95;"></div>
       </div>
     </div>
   </div>
@@ -2143,7 +2142,6 @@ function showPage(name) {
   if (name === 'dashboard') renderDashboard();
   if (name === 'ledger') renderLedger();
   if (name === 'sop') renderSOP();
-  if (name === 'form') renderPublicPage();
 
   updateActionVisibility(name);
 
@@ -2276,7 +2274,7 @@ function renderLedger(filtered) {
         </div>
         <div class="ledger-card-actions">
           <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();showDetail(${idx})">詳細を見る</button>
-          ${d.photoData ? `<button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();openLightbox('${getDisplayPhotoUrl(d.photoData)}')">写真を見る</button>` : ''}
+          ${d.photoData ? `<button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();openLightbox('${getDisplayPhotoUrl(photoSrc)}')">写真を見る</button>` : ''}
         </div>
       </div>`;
     }).join('') : `<div class="empty-state"><div class="emoji">📦</div><p>該当する忘れ物はありません</p></div>`;
@@ -2621,7 +2619,7 @@ function showDetail(idx) {
       <div class="detail-item"><div class="dl">価値区分</div><div class="dd"><span class="tag ${valueClass[d.value||'cheap']}">${valueLabel[d.value||'cheap']}</span></div></div>
       <div class="detail-item"><div class="dl">公開表示名</div><div class="dd">${d.publicName||'-'}</div></div>
       <div class="detail-item"><div class="dl">ボックス番号</div><div class="dd">${d.boxNo||'-'}</div></div>
-      ${d.photoData ? `<div class="detail-item full"><div class="dl">写真</div><div class="dd detail-photo-wrap"><img class="detail-photo" src="${getDisplayPhotoUrl(d.photoData)}" data-fallback="${getDisplayPhotoFallbackUrl(d.photoData)}" alt="忘れ物写真" onclick="openLightbox('${getDisplayPhotoUrl(d.photoData)}')" onerror="handleDetailPhotoError(this)"><div class="detail-photo-note">プレビューできない場合は、下のボタンから写真を開いてください。</div><div class="detail-photo-actions"><button class="photo-action-btn" onclick="openLightbox('${getDisplayPhotoUrl(d.photoData)}');event.stopPropagation();">拡大表示</button><button class="photo-action-btn" onclick="openPhotoInNewTab('${getPhotoOpenUrl(d.photoData)}', event)">別タブで開く</button></div></div></div>` : ''}
+      ${d.photoData ? `<div class="detail-item full"><div class="dl">写真</div><div class="dd detail-photo-wrap"><img class="detail-photo" src="${getDisplayPhotoUrl(d.photoData)}" data-fallback="${getDisplayPhotoFallbackUrl(d.photoData)}" alt="忘れ物写真" onclick="openLightbox('${getDisplayPhotoUrl(photoSrc)}')" onerror="handleDetailPhotoError(this)"><div class="detail-photo-note">プレビューできない場合は、下のボタンから写真を開いてください。</div><div class="detail-photo-actions"><button class="photo-action-btn" onclick="openLightbox('${getDisplayPhotoUrl(photoSrc)}');event.stopPropagation();">拡大表示</button><button class="photo-action-btn" onclick="openPhotoInNewTab('${getPhotoOpenUrl(photoSrc)}', event)">別タブで開く</button></div></div></div>` : ''}
     </div>
   `;
   const deleteBtn = document.getElementById('detail-delete-btn');
@@ -3140,13 +3138,13 @@ function scrollToPublicList(event) {
   renderPublicPage();
   const page = document.getElementById('public-page');
   const target = document.getElementById('public-list-top') || page;
-  if (!page || !target) return false;
+  if (!page || !target) return;
   page.classList.add('open');
+  const rect = target.getBoundingClientRect();
+  const targetY = window.pageYOffset + rect.top - 12;
   try {
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.scrollTo({ top: Math.max(targetY, 0), behavior: 'smooth' });
   } catch (e) {
-    const rect = target.getBoundingClientRect();
-    const targetY = window.pageYOffset + rect.top - 12;
     window.scrollTo(0, Math.max(targetY, 0));
   }
   try {
@@ -3158,7 +3156,6 @@ function scrollToPublicList(event) {
     page.style.outline = '';
     page.style.outlineOffset = '';
   }, 1200);
-  return false;
 }
 
 function openPublicPage() {
@@ -3180,8 +3177,11 @@ function closePublicPage() {
   page.classList.remove('open');
 }
 function renderPublicPage() {
-  const search = (document.getElementById('pub-search').value || '').toLowerCase();
-  const filterVal = document.getElementById('pub-filter-value').value;
+  const searchEl = document.getElementById('pub-search');
+  const valueEl = document.getElementById('pub-filter-value');
+  if (!list) return;
+  const search = ((searchEl && searchEl.value) || '').toLowerCase();
+  const filterVal = (valueEl && valueEl.value) || '';
 
   const visible = ledgerData.filter(d => {
     if (d.status === 'returned' || d.status === 'disposed') return false;
@@ -3193,12 +3193,6 @@ function renderPublicPage() {
     return true;
   });
 
-  const list = document.getElementById('pub-list');
-  const countEl = document.getElementById('public-count');
-  if (countEl) {
-    const storeLabel = publicStoreFilter ? `${publicStoreFilter} / ` : '';
-    countEl.textContent = `${storeLabel}表示件数：${visible.length}件`;
-  }
   if (!visible.length) {
     const storeLabel = publicStoreFilter ? `「${publicStoreFilter}」で` : '';
     list.innerHTML = `<div class="empty-state"><div class="emoji">📭</div><p>${storeLabel}現在保管中の忘れ物はありません</p></div>`;
@@ -3210,13 +3204,13 @@ function renderPublicPage() {
     const tagHtml = isCheap
       ? '<span class="tag tag-cheap">安価</span>'
       : '<span class="tag tag-valuable">高価</span>';
-    const publicPhoto = d.photoData || d.inquiryPhotoUrl || '';
-    const photoHtml = isCheap && publicPhoto ? `
+    const photoSrc = d.photoData || d.inquiryPhotoUrl || '';
+    const photoHtml = isCheap && photoSrc ? `
       <div class="pub-photo-row">
-        ${renderThumbOnly(publicPhoto, d.publicName || d.item || '忘れ物', 'pub-thumb')}
+        ${renderThumbOnly(photoSrc, d.publicName || d.item, 'pub-thumb')}
         <div class="pub-photo-actions">
-          <button class="photo-action-btn" onclick="openLightbox('${getDisplayPhotoUrl(publicPhoto)}');event.stopPropagation();">写真を拡大</button>
-          <button class="photo-action-btn" onclick="openPhotoInNewTab('${getPhotoOpenUrl(publicPhoto)}', event)">別タブで開く</button>
+          <button class="photo-action-btn" onclick="openLightbox('${getDisplayPhotoUrl(photoSrc)}');event.stopPropagation();">写真を拡大</button>
+          <button class="photo-action-btn" onclick="openPhotoInNewTab('${getPhotoOpenUrl(photoSrc)}', event)">別タブで開く</button>
           <div class="pub-photo-note">写真が開きにくい場合は「別タブで開く」をお試しください。</div>
         </div>
       </div>` : '';
@@ -3228,7 +3222,7 @@ function renderPublicPage() {
     <div class="pub-card">
       <div class="pub-card-head">
         <div>
-          <div class="pub-item-name">${d.publicName || d.item || '忘れ物'}</div>
+          <div class="pub-item-name">${d.publicName || d.item}</div>
           <div class="pub-meta">発見日：${d.foundDate || '確認中'}　/　拠点：${parsePlaceValue(d.place || '').store || '確認中'}</div>
         </div>
         ${tagHtml}
@@ -3241,21 +3235,7 @@ function renderPublicPage() {
 }
 
 
-
-function setupCustomerPublicSection() {
-  if (!document.body.classList.contains('customer-mode')) return;
-  const content = document.querySelector('.content');
-  const formPage = document.getElementById('page-form');
-  const publicPage = document.getElementById('public-page');
-  if (!content || !formPage || !publicPage) return;
-  if (content.firstElementChild !== publicPage) {
-    content.insertBefore(publicPage, formPage);
-  }
-  publicPage.classList.add('open');
-}
-
 // ── Init ──
-setupCustomerPublicSection();
 renderDashboard();
 renderSOP();
 initGasEndpointUI();
@@ -3263,15 +3243,10 @@ initUseTimeDropdowns();
 const appRole = document.body.dataset.role || 'staff';
 const initialPage = appRole === 'customer' ? 'form' : 'dashboard';
 showPage(initialPage);
+renderPublicPage();
 if (appRole !== 'customer' || hasGasEndpoint()) {
   loadFromGAS();
 }
-
-window.addEventListener('load', () => {
-  if (location.hash === '#public-list-top') {
-    setTimeout(() => { scrollToPublicList(); }, 100);
-  }
-});
 
 </script>
 </body>
