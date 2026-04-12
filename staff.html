@@ -2500,12 +2500,15 @@ function extractDriveFileId(url) {
 
 function getDisplayPhotoUrl(url) {
   if (!url) return '';
+  // ローカルファイルパスは無効として弾く
+  if (String(url).startsWith('file://') || String(url).startsWith('blob:')) return '';
   const fileId = extractDriveFileId(url);
   if (!fileId) return url;
   return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1600`;
 }
 
 function getDisplayPhotoFallbackUrl(url) {
+  if (!url || String(url).startsWith('file://') || String(url).startsWith('blob:')) return '';
   const fileId = extractDriveFileId(url);
   if (!fileId) return url || '';
   return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
@@ -2518,6 +2521,7 @@ function getPhotoThumbUrl(url) {
 }
 
 function getPhotoOpenUrl(url) {
+  if (!url || String(url).startsWith('file://') || String(url).startsWith('blob:')) return '';
   const fileId = extractDriveFileId(url);
   if (!fileId) return url || '';
   return `https://drive.google.com/file/d/${fileId}/view?usp=drivesdk`;
@@ -2593,7 +2597,7 @@ function showDetail(idx) {
       <div class="detail-item"><div class="dl">価値区分</div><div class="dd"><span class="tag ${valueClass[d.value||'cheap']}">${valueLabel[d.value||'cheap']}</span></div></div>
       <div class="detail-item"><div class="dl">公開表示名</div><div class="dd">${d.publicName||'-'}</div></div>
       <div class="detail-item"><div class="dl">ボックス番号</div><div class="dd">${d.boxNo||'-'}</div></div>
-      ${d.photoData ? `<div class="detail-item full"><div class="dl">写真</div><div class="dd detail-photo-wrap"><img class="detail-photo" src="${getDisplayPhotoUrl(d.photoData)}" data-fallback="${getDisplayPhotoFallbackUrl(d.photoData)}" alt="忘れ物写真" onclick="openLightbox('${getDisplayPhotoUrl(photoSrc)}')" onerror="handleDetailPhotoError(this)"><div class="detail-photo-note">プレビューできない場合は、下のボタンから写真を開いてください。</div><div class="detail-photo-actions"><button class="photo-action-btn" onclick="openLightbox('${getDisplayPhotoUrl(photoSrc)}');event.stopPropagation();">拡大表示</button><button class="photo-action-btn" onclick="openPhotoInNewTab('${getPhotoOpenUrl(photoSrc)}', event)">別タブで開く</button></div></div></div>` : ''}
+      ${d.photoData ? `<div class="detail-item full"><div class="dl">写真</div><div class="dd detail-photo-wrap"><img class="detail-photo" src="${getDisplayPhotoUrl(d.photoData)}" data-fallback="${getDisplayPhotoFallbackUrl(d.photoData)}" alt="忘れ物写真" onclick="openLightbox('${getDisplayPhotoUrl(d.photoData)}')" onerror="handleDetailPhotoError(this)"><div class="detail-photo-note">プレビューできない場合は、下のボタンから写真を開いてください。</div><div class="detail-photo-actions"><button class="photo-action-btn" onclick="openLightbox('${getDisplayPhotoUrl(d.photoData)}');event.stopPropagation();">拡大表示</button><button class="photo-action-btn" onclick="openPhotoInNewTab('${getPhotoOpenUrl(d.photoData)}', event)">別タブで開く</button></div></div></div>` : ''}
     </div>
   `;
   const deleteBtn = document.getElementById('detail-delete-btn');
