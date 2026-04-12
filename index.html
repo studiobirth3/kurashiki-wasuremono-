@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>忘れ物お問い合わせ</title>
+<title>忘れ物管理システム（スタッフ用）</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -527,14 +527,6 @@
     background:var(--bg); overflow-y:auto;
   }
   #public-page.open { display:block; }
-  body.customer-mode #public-page {
-    display:block; position:static; inset:auto; z-index:auto;
-    background:transparent; overflow:visible; margin-top:20px;
-  }
-  body.customer-mode #public-page.open { display:block; }
-  body.customer-mode .pub-close-btn { display:none !important; }
-  body.customer-mode .pub-hero { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
-  body.customer-mode .pub-content { padding-bottom: 20px; }
   .pub-hero {
     background:var(--accent); color:#fff;
     padding:24px 20px 20px;
@@ -542,35 +534,7 @@
   .pub-hero h1 { font-size:18px; font-weight:700; margin-bottom:4px; }
   .pub-hero p  { font-size:12px; opacity:.85; }
   .pub-content { max-width:640px; margin:0 auto; padding:20px 16px 60px; }
-
-  #public-list-top { scroll-margin-top: 72px; }
-  @media(max-width:640px){
-    #public-list-top { scroll-margin-top: 64px; }
-  }
   .pub-filter  { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
-
-  .pub-store-tabs { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 12px; }
-  .pub-store-tab {
-    border:1px solid var(--border-strong);
-    background:var(--surface);
-    color:var(--text-sub);
-    border-radius:999px;
-    padding:8px 12px;
-    font-size:12px;
-    font-weight:700;
-    cursor:pointer;
-    font-family:inherit;
-    transition:all .15s;
-  }
-  .pub-store-tab:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-light); }
-  .pub-store-tab.active { background:var(--accent); color:#fff; border-color:var(--accent); }
-  .pub-store-select-wrap { display:none; margin-bottom:12px; }
-  .pub-store-select {
-    width:100%;
-    border:1px solid var(--border-strong); border-radius:var(--radius);
-    padding:8px 12px; font-family:inherit; font-size:13px;
-    background:var(--surface); color:var(--text);
-  }
   .pub-search  {
     flex:1; min-width:140px;
     border:1px solid var(--border-strong); border-radius:var(--radius);
@@ -611,8 +575,6 @@
     .pub-hero { padding:18px 14px 16px; }
     .pub-hero h1 { font-size:16px; }
     .pub-content { padding:14px 12px 80px; }
-    .pub-store-tabs { display:none; }
-    .pub-store-select-wrap { display:block; }
   }
 
   .urgency-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
@@ -684,30 +646,28 @@
   }
 
 
-/* ── Customer Mode ── */
-body.customer-mode .sidebar,
-body.customer-mode #bottom-nav,
-body.customer-mode #mobile-quick-actions,
-body.customer-mode #page-dashboard,
-body.customer-mode #page-ledger,
-body.customer-mode #page-sop,
-body.customer-mode #page-gas,
-body.customer-mode #ledger-modal,
-body.customer-mode #detail-modal,
-body.customer-mode .nav-item,
-body.customer-mode .nav-group { display: none !important; }
-body.customer-mode .main { margin-left: 0; }
-body.customer-mode .content { max-width: 960px; width: 100%; margin: 0 auto; }
-body.customer-mode .topbar { height: auto; min-height: 64px; padding-top: 14px; padding-bottom: 14px; }
-body.customer-mode .customer-topbar-sub { font-size: 12px; color: var(--text-sub); margin-top: 4px; }
-body.customer-mode .sidebar-logo { border-bottom: none; }
-body.customer-mode .pub-close-btn::after { content: ''; }
-@media (max-width: 640px) {
-  body.customer-mode .topbar { padding: 12px 14px; align-items: flex-start; }
-  body.customer-mode .topbar .actions { width: 100%; justify-content: flex-end; }
-  body.customer-mode .customer-topbar { flex-direction: column; gap: 10px; }
-  body.customer-mode .content { padding: 14px; }
-}
+  .mobile-save-bar { display:none; }
+  @media (max-width: 640px) {
+    .mobile-save-bar {
+      display:block;
+      position: sticky;
+      bottom: 0;
+      margin-top: 14px;
+      padding-top: 12px;
+      background: linear-gradient(to top, var(--surface) 75%, rgba(255,255,255,0));
+      z-index: 2;
+    }
+    .mobile-save-bar .btn {
+      width: 100%;
+      justify-content: center;
+      min-height: 52px;
+      font-size: 16px;
+    }
+  }
+
+
+/* ── Staff helper link ── */
+body.staff-mode .topbar .actions a.btn { text-decoration: none; }
 
 
   /* ── Photo thumbnails / mobile cards ── */
@@ -776,7 +736,7 @@ body.customer-mode .pub-close-btn::after { content: ''; }
 
 </style>
 </head>
-<body class="customer-mode" data-role="customer">
+<body class="staff-mode" data-role="staff">
 <!-- GitHub Pages 公開用版 -->
 
 <div class="app">
@@ -821,6 +781,7 @@ body.customer-mode .pub-close-btn::after { content: ''; }
     <div class="topbar">
       <h2 id="page-title">ダッシュボード</h2>
       <div class="actions">
+        <a class="btn btn-secondary btn-sm" href="./index.html">👤 お客さん用フォーム</a>
         <span id="sync-status" style="font-size:11px;color:var(--text-muted);display:none;"></span>
         <button class="btn btn-secondary btn-sm" id="topbar-sync-btn" onclick="loadFromGAS()" title="スプレッドシートから最新データを読み込む">🔄 同期</button>
         <button class="btn btn-secondary btn-sm" id="topbar-form-btn" onclick="showPage('form')">＋ 新規問い合わせ</button>
@@ -901,21 +862,11 @@ body.customer-mode .pub-close-btn::after { content: ''; }
         </div>
       </div>
 
-
-<!-- Form -->
-<div id="page-form" class="page">
-  <div class="card customer-entry-card" style="margin-bottom:16px;">
-    <div class="card-body" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-      <div>
-        <div style="font-size:15px;font-weight:700;">まずは保管中の忘れ物一覧をご確認ください</div>
-        <div style="font-size:12px;color:var(--text-sub);margin-top:4px;">心当たりのある物が見つからない場合も、そのままフォームからお問い合わせいただけます。</div>
-      </div>
-      <a class="btn btn-primary" href="#public-list-top" onclick="scrollToPublicList(event)">👁️ 公開一覧へ移動</a>
-    </div>
-  </div>
-  <div class="notice info" style="margin-bottom:20px;">
+      <!-- Form -->
+      <div id="page-form" class="page">
+        <div class="notice info" style="margin-bottom:20px;">
           <span class="icon">ℹ️</span>
-          <div>忘れ物のお問い合わせ専用フォームです。ご利用日・店舗・部屋名・忘れ物の特徴をご入力ください。送信後に受付メッセージが表示されます。</div>
+          <div>このフォームはスタッフ・顧客向けの問い合わせ受付画面です。送信後に自動返信メッセージが表示されます。</div>
         </div>
 
         <div class="card">
@@ -1771,7 +1722,6 @@ function jsonResponse(obj) {
 
 <!-- 公開ページ（お客さん向け） -->
 <div id="public-page">
-  <div id="public-list-top"></div>
   <div class="pub-hero">
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <div>
@@ -1809,7 +1759,7 @@ function jsonResponse(obj) {
       <button class="btn btn-primary" onclick="closePublicPage();showPage('form');">📝 問い合わせフォームへ</button>
     </div>
   </div>
-  <button class="pub-close-btn" onclick="closePublicPage()">✕ 閉じる</button>
+  <button class="pub-close-btn" onclick="closePublicPage()">✕ 閉じる（スタッフ画面）</button>
 </div>
 
 <!-- 台帳登録モーダル -->
@@ -1918,6 +1868,9 @@ function jsonResponse(obj) {
           <label>忘れ物ボックス番号<span style="font-size:10px;font-weight:400;margin-left:6px;color:var(--text-muted);">安価品のみ：お客さんが直接引き取るボックス</span></label>
           <input type="text" class="form-control" id="m-box-no" placeholder="例：A-1、B-3">
         </div>
+      </div>
+      <div class="mobile-save-bar">
+        <button class="btn btn-primary" type="button" onclick="saveLedger()">✅ この内容で登録する</button>
       </div>
     </div>
     <div class="modal-footer">
@@ -3118,63 +3071,12 @@ function toggleBoxNo() {
 }
 
 // ── Public Page ──
-let publicStoreFilter = '';
-
-function setPublicStoreFilter(store, syncSelect = true) {
-  publicStoreFilter = store || '';
-  document.querySelectorAll('#pub-store-tabs .pub-store-tab').forEach(btn => {
-    btn.classList.toggle('active', (btn.dataset.store || '') === publicStoreFilter);
-  });
-  if (syncSelect) {
-    const sel = document.getElementById('pub-filter-store');
-    if (sel) sel.value = publicStoreFilter;
-  }
-  renderPublicPage();
-}
-
-
-function scrollToPublicList(event) {
-  if (event) event.preventDefault();
-  renderPublicPage();
-  const page = document.getElementById('public-page');
-  const target = document.getElementById('public-list-top') || page;
-  if (!page || !target) return;
-  page.classList.add('open');
-  const rect = target.getBoundingClientRect();
-  const targetY = window.pageYOffset + rect.top - 12;
-  try {
-    window.scrollTo({ top: Math.max(targetY, 0), behavior: 'smooth' });
-  } catch (e) {
-    window.scrollTo(0, Math.max(targetY, 0));
-  }
-  try {
-    history.replaceState(null, '', '#public-list-top');
-  } catch (e) {}
-  page.style.outline = '2px solid rgba(45,90,61,0.25)';
-  page.style.outlineOffset = '4px';
-  setTimeout(() => {
-    page.style.outline = '';
-    page.style.outlineOffset = '';
-  }, 1200);
-}
-
 function openPublicPage() {
   renderPublicPage();
-  const page = document.getElementById('public-page');
-  if (document.body.classList.contains('customer-mode')) {
-    page.classList.add('open');
-    page.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    return;
-  }
-  page.classList.add('open');
+  document.getElementById('public-page').classList.add('open');
 }
 function closePublicPage() {
-  const page = document.getElementById('public-page');
-  if (document.body.classList.contains('customer-mode')) {
-    page.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    return;
-  }
-  page.classList.remove('open');
+  document.getElementById('public-page').classList.remove('open');
 }
 function renderPublicPage() {
   const searchEl = document.getElementById('pub-search');
@@ -3186,16 +3088,13 @@ function renderPublicPage() {
   const visible = ledgerData.filter(d => {
     if (d.status === 'returned' || d.status === 'disposed') return false;
     if (filterVal && d.value !== filterVal) return false;
-    const store = parsePlaceValue(d.place || '').store || '';
-    if (publicStoreFilter && store !== publicStoreFilter) return false;
     const pn = (d.publicName || '').toLowerCase();
     if (search && !pn.includes(search)) return false;
     return true;
   });
 
   if (!visible.length) {
-    const storeLabel = publicStoreFilter ? `「${publicStoreFilter}」で` : '';
-    list.innerHTML = `<div class="empty-state"><div class="emoji">📭</div><p>${storeLabel}現在保管中の忘れ物はありません</p></div>`;
+    list.innerHTML = '<div class="empty-state"><div class="emoji">📭</div><p>現在保管中の忘れ物はありません</p></div>';
     return;
   }
 
@@ -3223,7 +3122,7 @@ function renderPublicPage() {
       <div class="pub-card-head">
         <div>
           <div class="pub-item-name">${d.publicName || d.item}</div>
-          <div class="pub-meta">発見日：${d.foundDate || '確認中'}　/　拠点：${parsePlaceValue(d.place || '').store || '確認中'}</div>
+          <div class="pub-meta">発見日：${d.foundDate || '確認中'}</div>
         </div>
         ${tagHtml}
       </div>
@@ -3243,7 +3142,6 @@ initUseTimeDropdowns();
 const appRole = document.body.dataset.role || 'staff';
 const initialPage = appRole === 'customer' ? 'form' : 'dashboard';
 showPage(initialPage);
-renderPublicPage();
 if (appRole !== 'customer' || hasGasEndpoint()) {
   loadFromGAS();
 }
