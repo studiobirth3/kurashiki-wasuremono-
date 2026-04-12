@@ -2095,6 +2095,7 @@ function showPage(name) {
   if (name === 'dashboard') renderDashboard();
   if (name === 'ledger') renderLedger();
   if (name === 'sop') renderSOP();
+  if (name === 'form') renderPublicPage();
 
   updateActionVisibility(name);
 
@@ -3038,13 +3039,16 @@ async function loadFromGAS() {
     nextId = Math.max(...nums, 0) + 1;
     renderDashboard();
     renderLedger();
+    renderPublicPage();
     showSyncStatus('✅ ' + ledgerData.length + '件を読み込みました');
   } else if (result && result.success && result.items.length === 0) {
     ledgerData = [];
     renderDashboard();
     renderLedger();
+    renderPublicPage();
     showSyncStatus('✅ スプレッドシートに登録データなし');
   } else {
+    renderPublicPage();
     showSyncStatus('❌ 読み込み失敗。GAS設定を確認してください');
   }
 }
@@ -3098,12 +3102,13 @@ function renderPublicPage() {
     const tagHtml = isCheap
       ? '<span class="tag tag-cheap">安価</span>'
       : '<span class="tag tag-valuable">高価</span>';
-    const photoHtml = isCheap && d.photoData ? `
+    const publicPhoto = d.photoData || d.inquiryPhotoUrl || '';
+    const photoHtml = isCheap && publicPhoto ? `
       <div class="pub-photo-row">
-        ${renderThumbOnly(d.photoData, d.publicName || d.item, 'pub-thumb')}
+        ${renderThumbOnly(publicPhoto, d.publicName || d.item || '忘れ物', 'pub-thumb')}
         <div class="pub-photo-actions">
-          <button class="photo-action-btn" onclick="openLightbox('${getDisplayPhotoUrl(d.photoData)}');event.stopPropagation();">写真を拡大</button>
-          <button class="photo-action-btn" onclick="openPhotoInNewTab('${getPhotoOpenUrl(d.photoData)}', event)">別タブで開く</button>
+          <button class="photo-action-btn" onclick="openLightbox('${getDisplayPhotoUrl(publicPhoto)}');event.stopPropagation();">写真を拡大</button>
+          <button class="photo-action-btn" onclick="openPhotoInNewTab('${getPhotoOpenUrl(publicPhoto)}', event)">別タブで開く</button>
           <div class="pub-photo-note">写真が開きにくい場合は「別タブで開く」をお試しください。</div>
         </div>
       </div>` : '';
@@ -3115,7 +3120,7 @@ function renderPublicPage() {
     <div class="pub-card">
       <div class="pub-card-head">
         <div>
-          <div class="pub-item-name">${d.publicName || d.item}</div>
+          <div class="pub-item-name">${d.publicName || d.item || '忘れ物'}</div>
           <div class="pub-meta">発見日：${d.foundDate || '確認中'}</div>
         </div>
         ${tagHtml}
@@ -3139,6 +3144,12 @@ showPage(initialPage);
 if (appRole !== 'customer' || hasGasEndpoint()) {
   loadFromGAS();
 }
+
+window.addEventListener('load', () => {
+  if (location.hash === '#public-list-top') {
+    setTimeout(() => { scrollToPublicList(); }, 100);
+  }
+});
 
 </script>
 </body>
