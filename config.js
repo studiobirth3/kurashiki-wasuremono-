@@ -1,3 +1,3 @@
 window.APP_CONFIG = {
-  GAS_ENDPOINT: 'https://script.google.com/macros/s/AKfycbwStgztsN3U0qISGGrowCgsRIp5uitREk3YzrlesX4ezS-bGWLLOpuaBTQRZPvhIBo/exec'
+  GAS_ENDPOINT: 'https://script.google.com/macros/s/AKfycbzOH3Jb_Y_a-0eBvO8R0sCkAPHqeSiGjvGDSLyl6LQ83RcPJKSdOmzHuJC5F4LG5AXsjA/exec'
 };
