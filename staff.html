@@ -1911,7 +1911,7 @@ function jsonResponse(obj) {
     </div>
     <div class="modal-body" id="detail-body"></div>
     <div class="modal-footer">
-      <button class="btn btn-danger" id="detail-delete-btn" style="display:none;margin-right:auto;" onclick="deleteCurrentItem()">🗑️ 削除</button>
+      <button class="btn btn-danger" id="detail-delete-btn" style="margin-right:auto;" onclick="deleteCurrentItem()">🗑️ 削除</button>
       <button class="btn btn-secondary" onclick="closeDetailModal()">閉じる</button>
       <button class="btn btn-primary" onclick="updateStatus()">ステータス更新</button>
     </div>
@@ -1948,14 +1948,8 @@ function jsonResponse(obj) {
 
 <script>
 // ── Data ──
-let ledgerData = [
-  { id:'LF-20260401-001', foundDate:'2026/04/01', place:'更衣室', item:'黒いリュックサック', detail:'ナイキ製、財布入り', contact:'田中 花子', returnMethod:'store', urgency:'high', status:'found', deadline:'2026/04/15', inquiryDate:'2026/04/01', value:'valuable', publicName:'リュックサック', boxNo:'' },
-  { id:'LF-20260402-002', foundDate:'', place:'', item:'イヤホン（白）', detail:'AirPods Pro、ケースあり', contact:'鈴木 一郎', returnMethod:'ship', urgency:'normal', status:'searching', deadline:'2026/04/16', inquiryDate:'2026/04/02', value:'valuable', publicName:'イヤホン', boxNo:'' },
-  { id:'LF-20260402-003', foundDate:'', place:'', item:'水筒', detail:'象印製、赤色', contact:'佐藤 美咲', returnMethod:'pending', urgency:'normal', status:'searching', deadline:'2026/04/16', inquiryDate:'2026/04/02', value:'cheap', publicName:'水筒', boxNo:'B-3' },
-  { id:'LF-20260330-004', foundDate:'2026/03/31', place:'ロビー', item:'傘（折りたたみ）', detail:'紺色、ロゴなし', contact:'', returnMethod:'store', urgency:'normal', status:'returned', deadline:'2026/04/13', inquiryDate:'2026/03/30', value:'cheap', publicName:'傘', boxNo:'A-1' },
-  { id:'LF-20260328-005', foundDate:'2026/03/29', place:'スタジオB', item:'ヨガマット', detail:'ピンク色、薄型', contact:'高橋 明子', returnMethod:'store', urgency:'normal', status:'found', deadline:'2026/04/11', inquiryDate:'2026/03/28', value:'cheap', publicName:'ヨガマット', boxNo:'A-2' },
-];
-let nextId = 6;
+let ledgerData = [];
+let nextId = 1;
 let editingIdx = null;
 
 const statusLabel = { found:'発見済み', searching:'確認中', returned:'返却済み', disposed:'処分済み', pending:'未定' };
@@ -2601,7 +2595,7 @@ function showDetail(idx) {
     </div>
   `;
   const deleteBtn = document.getElementById('detail-delete-btn');
-  if (deleteBtn) deleteBtn.style.display = d.status === 'returned' ? '' : 'none';
+  if (deleteBtn) deleteBtn.style.display = '';
   document.getElementById('detail-modal').classList.add('open');
   updateActionVisibility(getCurrentPageName());
 }
@@ -2616,11 +2610,8 @@ function updateStatus() {
 async function deleteCurrentItem() {
   if (editingIdx === null || editingIdx === undefined) return;
   const target = ledgerData[editingIdx];
-  if (!target || target.status !== 'returned') {
-    showToast('返却済みの物のみ削除できます');
-    return;
-  }
-  const ok = confirm(`返却済みデータ ${target.id} を削除します。よろしいですか？`);
+  if (!target) return;
+  const ok = confirm(`「${target.item || target.id}」を削除します。\nこの操作は元に戻せません。よろしいですか？`);
   if (!ok) return;
 
   const targetId = target.id;
