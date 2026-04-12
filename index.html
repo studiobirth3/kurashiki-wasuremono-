@@ -3,3149 +3,651 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>忘れ物管理システム（スタッフ用）</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>忘れ物お問い合わせ・公開一覧</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f5f4f0;
-    --surface: #ffffff;
-    --surface2: #faf9f7;
-    --border: #e0ddd6;
-    --border-strong: #c8c4bb;
-    --text: #1a1917;
-    --text-sub: #6b6760;
-    --text-muted: #9e9b94;
-    --accent: #2d5a3d;
-    --accent-light: #e8f0eb;
-    --accent-hover: #234a31;
-    --warning: #8b5e00;
-    --warning-bg: #fff8e6;
-    --danger: #8b1a1a;
-    --danger-bg: #fdf0f0;
-    --info: #1a4a6b;
-    --info-bg: #eef4fa;
-    --tag-found: #2d5a3d;
-    --tag-found-bg: #e8f0eb;
-    --tag-searching: #8b5e00;
-    --tag-searching-bg: #fff8e6;
-    --tag-returned: #1a4a6b;
-    --tag-returned-bg: #eef4fa;
-    --tag-disposed: #6b6760;
-    --tag-disposed-bg: #f0eeea;
-    --radius: 8px;
-    --radius-lg: 12px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    --bg:#f5f4f0; --surface:#fff; --surface2:#faf9f7; --border:#e0ddd6; --border-strong:#c8c4bb;
+    --text:#1a1917; --text-sub:#6b6760; --text-muted:#9e9b94;
+    --accent:#2d5a3d; --accent-hover:#234a31; --accent-light:#e8f0eb;
+    --warning:#8b5e00; --warning-bg:#fff8e6; --danger:#8b1a1a; --danger-bg:#fdf0f0;
+    --radius:10px; --radius-lg:16px;
+    --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+    --shadow-md:0 10px 28px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.04);
   }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Noto Sans JP', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 14px;
-    line-height: 1.6;
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);line-height:1.65}
+  a{text-decoration:none;color:inherit}
+  .container{max-width:1100px;margin:0 auto;padding:0 16px}
+  .hero{background:linear-gradient(135deg,var(--accent),#3f7250);color:#fff;padding:24px 0 18px;box-shadow:var(--shadow)}
+  .hero-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .hero h1{font-size:24px;line-height:1.3}
+  .hero p{font-size:13px;opacity:.9;margin-top:6px}
+  .staff-link{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);padding:10px 14px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+  .main{padding:20px 0 40px}
+  .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;align-items:start}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
+  .card-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:12px;align-items:center}
+  .card-header h2{font-size:16px}
+  .card-body{padding:18px 20px}
+  .muted{color:var(--text-muted)}
+  .small{font-size:12px}
+  .notice{padding:12px 14px;border-radius:var(--radius);font-size:12px;line-height:1.7}
+  .notice.info{background:#eef4fa;border:1px solid #b8d4ea;color:#1a4a6b}
+  .notice.warn{background:var(--warning-bg);border:1px solid #f0d080;color:var(--warning)}
+  .pub-toolbar{display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
+  .store-tabs{display:flex;flex-wrap:wrap;gap:8px}
+  .store-tab{border:1px solid var(--border-strong);background:var(--surface);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;color:var(--text-sub);cursor:pointer}
+  .store-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .store-select{display:none;width:100%;padding:10px 12px;border:1px solid var(--border-strong);border-radius:var(--radius);background:#fff;font-size:13px}
+  .toolbar-row{display:flex;gap:8px;flex-wrap:wrap}
+  .search{flex:1;min-width:160px;padding:10px 12px;border:1px solid var(--border-strong);border-radius:var(--radius);font:inherit;background:#fff}
+  .filter{min-width:140px;padding:10px 12px;border:1px solid var(--border-strong);border-radius:var(--radius);font:inherit;background:#fff}
+  .count-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:12px;color:var(--text-sub)}
+  .pub-list{display:flex;flex-direction:column;gap:10px}
+  .pub-card{display:grid;grid-template-columns:84px 1fr;gap:12px;padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--surface2)}
+  .thumb-wrap{width:84px;height:84px;border-radius:12px;overflow:hidden;background:#ede9e2;border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+  .thumb-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb-fallback{font-size:28px;color:var(--text-muted)}
+  .pub-title{font-size:15px;font-weight:700;line-height:1.4}
+  .pub-meta{font-size:12px;color:var(--text-sub);margin-top:4px}
+  .pub-detail{font-size:12px;color:var(--text-sub);margin-top:7px;line-height:1.7}
+  .pub-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .tag{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:700}
+  .tag-cheap{background:var(--accent-light);color:var(--accent)}
+  .tag-valuable{background:var(--warning-bg);color:var(--warning)}
+  .pickup-box{margin-top:9px;padding:10px 12px;border-radius:10px;background:var(--accent-light);color:var(--accent);font-size:12px;font-weight:700}
+  .valuable-box{margin-top:9px;padding:10px 12px;border-radius:10px;background:var(--warning-bg);color:var(--warning);font-size:12px;line-height:1.7}
+  .empty{padding:28px 16px;text-align:center;color:var(--text-muted);font-size:13px}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .form-group{display:flex;flex-direction:column;gap:6px}
+  .form-group.full{grid-column:1/-1}
+  label{font-size:12px;font-weight:700;color:var(--text-sub)}
+  .req{color:#c0392b;margin-left:2px}
+  input, select, textarea{width:100%;padding:10px 12px;border:1px solid var(--border-strong);border-radius:10px;background:#fff;font:inherit;color:var(--text)}
+  textarea{min-height:92px;resize:vertical}
+  input:focus, select:focus, textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,90,61,.12)}
+  .time-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
+  .time-sep{font-size:13px;font-weight:700;color:var(--text-sub)}
+  .photo-box{border:2px dashed var(--border-strong);border-radius:12px;padding:14px;text-align:center;background:var(--surface2)}
+  .photo-preview{display:none;margin-top:10px}
+  .photo-preview img{width:100%;max-height:220px;object-fit:cover;border-radius:12px;border:1px solid var(--border)}
+  .photo-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:999px;padding:11px 16px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:var(--accent-hover)}
+  .btn-secondary{background:#fff;color:var(--text);border:1px solid var(--border-strong)}
+  .btn-block{width:100%}
+  .checks{display:flex;flex-direction:column;gap:8px}
+  .check{display:flex;gap:8px;align-items:flex-start}
+  .check input{width:16px;height:16px;margin-top:2px;accent-color:var(--accent)}
+  .check span{font-size:12px;color:var(--text-sub)}
+  .sticky-actions{position:sticky;bottom:12px;padding-top:12px;background:linear-gradient(to top, rgba(255,255,255,1) 70%, rgba(255,255,255,0))}
+  .toast-wrap{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:999}
+  .toast{background:#1f1d1a;color:#fff;padding:12px 14px;border-radius:12px;font-size:13px;box-shadow:var(--shadow-md)}
+  .loading{font-size:12px;color:var(--text-sub)}
+  .divider{height:1px;background:var(--border);margin:4px 0}
+  @media (max-width: 900px){
+    .grid{grid-template-columns:1fr}
   }
-
-  /* ── Layout ── */
-  .app { display: flex; min-height: 100vh; }
-
-  /* ── Sidebar (desktop) ── */
-  .sidebar {
-    width: 220px;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    top: 0; left: 0; bottom: 0;
-    z-index: 100;
+  @media (max-width: 640px){
+    .hero{padding:18px 0 14px}
+    .hero-top{flex-direction:column;align-items:flex-start}
+    .hero h1{font-size:20px}
+    .main{padding:14px 0 28px}
+    .container{padding:0 12px}
+    .card-header,.card-body{padding:14px}
+    .store-tabs{display:none}
+    .store-select{display:block}
+    .toolbar-row{flex-direction:column}
+    .pub-card{grid-template-columns:72px 1fr;padding:12px}
+    .thumb-wrap{width:72px;height:72px}
+    .form-grid{grid-template-columns:1fr}
+    .form-group.full{grid-column:1}
+    .time-row{grid-template-columns:1fr}
+    .time-sep{display:none}
+    .staff-link{width:100%;justify-content:center}
   }
-
-  .sidebar-logo {
-    padding: 24px 20px 20px;
-    border-bottom: 1px solid var(--border);
-  }
-  .sidebar-logo .logo-mark {
-    width: 32px; height: 32px;
-    background: var(--accent);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 10px;
-  }
-  .sidebar-logo .logo-mark span { color: #fff; font-size: 16px; }
-  .sidebar-logo h1 { font-size: 13px; font-weight: 700; color: var(--text); letter-spacing: 0.02em; }
-  .sidebar-logo p { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-
-  .sidebar-nav { padding: 12px 12px; flex: 1; }
-  .nav-group { margin-bottom: 4px; }
-  .nav-label { font-size: 10px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 8px 4px; }
-
-  .nav-item {
-    display: flex; align-items: center; gap: 8px;
-    padding: 8px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px; color: var(--text-sub);
-    font-weight: 500;
-    transition: all 0.15s;
-    margin-bottom: 1px;
-  }
-  .nav-item:hover { background: var(--bg); color: var(--text); }
-  .nav-item.active { background: var(--accent-light); color: var(--accent); font-weight: 700; }
-  .nav-item .icon { font-size: 15px; width: 18px; text-align: center; }
-  .nav-badge {
-    margin-left: auto;
-    background: var(--accent);
-    color: #fff;
-    font-size: 10px; font-weight: 700;
-    padding: 1px 6px; border-radius: 99px;
-  }
-
-  .main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
-
-  .topbar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 28px;
-    height: 56px;
-    display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; z-index: 50;
-  }
-  .topbar h2 { font-size: 15px; font-weight: 700; }
-  .topbar .actions { display: flex; gap: 8px; align-items: center; }
-
-  .content { padding: 28px; flex: 1; }
-
-  /* ── Bottom Nav (mobile only) ── */
-  .bottom-nav { display: none; }
-
-  /* ── Mobile overrides ── */
-  @media (max-width: 640px) {
-    .sidebar { display: none; }
-    .main { margin-left: 0; padding-bottom: 64px; }
-
-    .topbar {
-      padding: 0 14px;
-      height: 50px;
-    }
-    .topbar h2 { font-size: 14px; }
-    .topbar .actions .btn-secondary { display: none; } /* ＋新規問い合わせ は省略 */
-    .topbar .actions .btn-primary { font-size: 11px; padding: 6px 10px; }
-
-    .content { padding: 14px; }
-
-    /* ボトムナビ */
-    .bottom-nav {
-      display: flex;
-      position: fixed; bottom: 0; left: 0; right: 0;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      z-index: 200;
-      height: 60px;
-    }
-    .bn-item {
-      flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 3px; cursor: pointer;
-      font-size: 9px; font-weight: 700; color: var(--text-muted);
-      transition: color 0.15s; position: relative;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .bn-item.active { color: var(--accent); }
-    .bn-item .bn-icon { font-size: 20px; line-height: 1; }
-    .bn-badge {
-      position: absolute; top: 6px; right: calc(50% - 18px);
-      background: var(--accent); color: #fff;
-      font-size: 9px; font-weight: 700;
-      padding: 1px 5px; border-radius: 99px;
-      min-width: 16px; text-align: center;
-    }
-  }
-
-  /* ── Buttons ── */
-  .btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 16px; border-radius: var(--radius);
-    font-family: inherit; font-size: 13px; font-weight: 600;
-    cursor: pointer; border: none; transition: all 0.15s;
-    white-space: nowrap;
-  }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: var(--accent-hover); }
-  .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border-strong); }
-  .btn-secondary:hover { background: var(--bg); }
-  .btn-sm { padding: 5px 10px; font-size: 12px; }
-  .btn-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid #f0c0c0; }
-
-  /* ── Cards ── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow);
-  }
-  .card-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .card-header h3 { font-size: 13px; font-weight: 700; }
-  .card-body { padding: 20px; }
-
-  /* ── Stats ── */
-  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 16px 20px;
-    box-shadow: var(--shadow);
-  }
-  .stat-card .label { font-size: 11px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
-  .stat-card .value { font-size: 28px; font-weight: 700; margin-top: 4px; font-family: 'DM Mono', monospace; }
-  .stat-card .sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-  .stat-card.green .value { color: var(--accent); }
-  .stat-card.yellow .value { color: var(--warning); }
-  .stat-card.blue .value { color: var(--info); }
-  .stat-card.gray .value { color: var(--text-sub); }
-
-  /* ── Table ── */
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  thead th {
-    text-align: left; padding: 10px 14px;
-    font-size: 11px; font-weight: 700; color: var(--text-muted);
-    letter-spacing: 0.06em; text-transform: uppercase;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface2);
-    white-space: nowrap;
-  }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; cursor: pointer; }
-  tbody tr:hover { background: var(--surface2); }
-  tbody tr:last-child { border-bottom: none; }
-  td { padding: 12px 14px; }
-  .td-id { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-muted); }
-  .td-main { font-weight: 600; }
-  .td-sub { font-size: 12px; color: var(--text-sub); }
-
-  /* ── Status Tags ── */
-  .tag {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 3px 8px; border-radius: 99px;
-    font-size: 11px; font-weight: 700; white-space: nowrap;
-  }
-  .tag-found { background: var(--tag-found-bg); color: var(--tag-found); }
-  .tag-searching { background: var(--tag-searching-bg); color: var(--tag-searching); }
-  .tag-returned { background: var(--tag-returned-bg); color: var(--tag-returned); }
-  .tag-disposed { background: var(--tag-disposed-bg); color: var(--tag-disposed); }
-  .tag-pending { background: #f0eeea; color: #6b6760; }
-
-  .tag::before { content: '●'; font-size: 7px; }
-
-  /* ── Form ── */
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .form-group { display: flex; flex-direction: column; gap: 5px; }
-  .form-group.full { grid-column: 1 / -1; }
-  .form-group label { font-size: 12px; font-weight: 700; color: var(--text-sub); }
-  .form-group label .req { color: #c0392b; margin-left: 2px; }
-  .form-control {
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius);
-    padding: 9px 12px;
-    font-family: inherit; font-size: 13px; color: var(--text);
-    background: var(--surface);
-    transition: border-color 0.15s, box-shadow 0.15s;
-    width: 100%;
-  }
-  .form-control:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(45,90,61,0.12); }
-  select.form-control { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6760' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
-  textarea.form-control { resize: vertical; min-height: 80px; }
-
-  .form-divider { grid-column: 1/-1; border: none; border-top: 1px solid var(--border); margin: 4px 0; }
-  .form-section-title { grid-column: 1/-1; font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; padding-top: 4px; }
-
-  .checkbox-group { display: flex; flex-direction: column; gap: 8px; }
-  .checkbox-item { display: flex; align-items: flex-start; gap: 8px; cursor: pointer; }
-  .checkbox-item input[type=checkbox] { margin-top: 2px; width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; }
-  .checkbox-item span { font-size: 12px; color: var(--text-sub); line-height: 1.5; }
-
-  /* ── Auto Reply Preview ── */
-  .auto-reply-box {
-    background: var(--info-bg);
-    border: 1px solid #b8d4ea;
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    font-size: 13px; color: var(--info);
-    line-height: 1.7;
-  }
-  .auto-reply-box strong { display: block; margin-bottom: 6px; font-size: 12px; letter-spacing: 0.04em; }
-
-  /* ── SOP ── */
-  .sop-list { display: flex; flex-direction: column; gap: 0; }
-  .sop-item {
-    display: flex; gap: 14px; align-items: flex-start;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .sop-item:last-child { border-bottom: none; }
-  .sop-num {
-    width: 28px; height: 28px; border-radius: 50%;
-    background: var(--bg); border: 1px solid var(--border-strong);
-    font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 700;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--text-sub); flex-shrink: 0;
-  }
-  .sop-item.done .sop-num { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
-  .sop-item.done .sop-num::after { content: '✓'; }
-  .sop-check { cursor: pointer; }
-  .sop-text { font-size: 13px; font-weight: 500; padding-top: 4px; }
-  .sop-note { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-
-  /* ── Modal ── */
-  .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(20,18,15,0.55);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 200; opacity: 0; pointer-events: none;
-    transition: opacity 0.2s;
-  }
-  .modal-overlay.open { opacity: 1; pointer-events: all; }
-  .modal {
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    width: 640px; max-width: 92vw; max-height: 88vh;
-    display: flex; flex-direction: column;
-    box-shadow: 0 24px 64px rgba(0,0,0,0.18);
-    transform: translateY(12px); transition: transform 0.2s;
-  }
-  .modal-overlay.open .modal { transform: translateY(0); }
-  .modal-header {
-    padding: 18px 22px 16px;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .modal-header h3 { font-size: 15px; font-weight: 700; }
-  .modal-close { background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-muted); line-height: 1; padding: 2px 6px; border-radius: 4px; }
-  .modal-close:hover { background: var(--bg); }
-  .modal-body { padding: 22px; overflow-y: auto; flex: 1; }
-  .modal-footer { padding: 16px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
-
-  /* ── Tabs ── */
-  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
-  .tab {
-    padding: 10px 18px; font-size: 13px; font-weight: 600; color: var(--text-muted);
-    cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
-    transition: all 0.15s;
-  }
-  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .tab:hover:not(.active) { color: var(--text); }
-
-  /* ── Filters ── */
-  .filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-  .filter-select {
-    border: 1px solid var(--border-strong); border-radius: var(--radius);
-    padding: 6px 28px 6px 10px; font-family: inherit; font-size: 12px; font-weight: 600;
-    background: var(--surface); color: var(--text); cursor: pointer;
-    appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b6760' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center;
-  }
-  .search-input {
-    border: 1px solid var(--border-strong); border-radius: var(--radius);
-    padding: 6px 10px; font-family: inherit; font-size: 12px;
-    background: var(--surface); color: var(--text);
-    width: 180px;
-  }
-  .search-input:focus { outline: none; border-color: var(--accent); }
-
-  /* ── Notice ── */
-  .notice {
-    padding: 12px 16px; border-radius: var(--radius);
-    font-size: 12px; line-height: 1.6;
-    display: flex; gap: 10px; align-items: flex-start;
-  }
-  .notice.warning { background: var(--warning-bg); color: var(--warning); border: 1px solid #f0d080; }
-  .notice.info { background: var(--info-bg); color: var(--info); border: 1px solid #b8d4ea; }
-  .notice .icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
-
-  /* ── Toast ── */
-  .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 300; display: flex; flex-direction: column; gap: 8px; }
-  .toast {
-    background: var(--text); color: #fff;
-    padding: 12px 18px; border-radius: var(--radius);
-    font-size: 13px; font-weight: 500;
-    box-shadow: var(--shadow-md);
-    animation: slideIn 0.2s ease;
-  }
-  @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-  /* ── Detail ── */
-  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .detail-item .dl { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 3px; }
-  .detail-item .dd { font-size: 13px; font-weight: 500; }
-  .detail-item.full { grid-column: 1/-1; }
-
-  /* ── Page visibility ── */
-  .page { display: none; }
-  .page.active { display: block; }
-
-  /* ── SOP two-col ── */
-  .sop-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-
-  /* ── Responsive (tablet) ── */
-  @media (max-width: 900px) {
-    .stats-grid { grid-template-columns: 1fr 1fr; }
-  }
-
-  /* ── Responsive (mobile) ── */
-  @media (max-width: 640px) {
-    .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-    .stat-card { padding: 12px 14px; }
-    .stat-card .value { font-size: 22px; }
-    .form-grid { grid-template-columns: 1fr; gap: 12px; }
-    .form-group.full { grid-column: 1; }
-    .detail-grid { grid-template-columns: 1fr; }
-    .detail-item.full { grid-column: 1; }
-    table { font-size: 12px; }
-    thead th { padding: 8px 8px; font-size: 10px; }
-    td { padding: 10px 8px; }
-    .filters { flex-direction: column; align-items: stretch; }
-    .search-input { width: 100%; }
-    .filter-select { width: 100%; }
-    .tabs { overflow-x: auto; white-space: nowrap; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
-    .tab { padding: 10px 12px; font-size: 12px; flex-shrink: 0; }
-    .modal { max-width: 96vw; max-height: 92vh; border-radius: 12px 12px 0 0; }
-    .modal-overlay { align-items: flex-end; }
-    .modal-body { padding: 16px; }
-    .modal-footer { padding: 12px 16px; }
-    .modal-header { padding: 14px 16px 12px; }
-    .card-body { padding: 14px; }
-    .card-header { padding: 12px 14px; }
-    pre { font-size: 10px !important; }
-    .toast-container { bottom: 72px; right: 12px; left: 12px; }
-    .toast { font-size: 12px; padding: 10px 14px; }
-    .notice { font-size: 11px; }
-    .auto-reply-box { font-size: 12px; }
-    .time-select-row { grid-template-columns: 1fr; }
-    .time-sep { display: none; }
-    .sop-two-col { grid-template-columns: 1fr !important; }
-  }
-
-  .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted); }
-  .empty-state .emoji { font-size: 36px; margin-bottom: 12px; }
-  .empty-state p { font-size: 13px; }
-
-  .upload-area {
-    border: 2px dashed var(--border-strong); border-radius: var(--radius);
-    padding: 20px; text-align: center; cursor: pointer;
-    color: var(--text-muted); font-size: 12px;
-    transition: all 0.15s;
-  }
-  .upload-area:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-
-
-
-  /* ── Photo upload (modal) ── */
-  .photo-upload-area {
-    border: 2px dashed var(--border-strong); border-radius: var(--radius);
-    padding: 0; text-align: center; cursor: pointer;
-    color: var(--text-muted); font-size: 12px;
-    transition: all 0.15s; overflow: hidden; position: relative;
-    min-height: 80px; display: flex; align-items: center; justify-content: center;
-    flex-direction: column; gap: 6px;
-    background: var(--bg);
-  }
-  .photo-upload-area:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-  .photo-upload-area.has-photo { border-style: solid; border-color: var(--accent); padding: 0; }
-  .photo-upload-area img {
-    width: 100%; max-height: 200px; object-fit: cover;
-    border-radius: calc(var(--radius) - 2px); display: block;
-  }
-  .photo-upload-overlay {
-    position: absolute; inset: 0;
-    background: rgba(0,0,0,0.45);
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    opacity: 0; transition: opacity 0.2s; border-radius: calc(var(--radius) - 2px);
-  }
-  .photo-upload-area.has-photo:hover .photo-upload-overlay { opacity: 1; }
-  .photo-btn {
-    background: #fff; color: var(--text); border: none;
-    border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 700;
-    cursor: pointer; font-family: inherit;
-  }
-  .photo-btn.danger { background: var(--danger-bg); color: var(--danger); }
-
-  /* カメラ・ギャラリー選択UI */
-  .photo-source-row { display: flex; gap: 8px; margin-top: 6px; }
-  .photo-source-btn {
-    flex: 1; display: flex; flex-direction: column; align-items: center;
-    gap: 4px; padding: 10px 8px;
-    border: 1px solid var(--border-strong); border-radius: var(--radius);
-    background: var(--surface); cursor: pointer; font-family: inherit;
-    font-size: 11px; font-weight: 700; color: var(--text-sub);
-    transition: all 0.15s;
-  }
-  .photo-source-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-
-  .time-select-row {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 8px;
-    align-items: center;
-  }
-  .time-sep {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-sub);
-  }
-  .photo-source-btn .psb-icon { font-size: 22px; }
-
-  /* 詳細モーダル内の写真表示 */
-  .detail-photo {
-    width: 100%; border-radius: var(--radius); border: 1px solid var(--border);
-    object-fit: cover; max-height: 240px; cursor: zoom-in; display: block;
-  }
-
-  .detail-photo.is-broken { display:none; }
-  .detail-photo-link { display:inline-block; margin-top:8px; font-size:12px; }
-  .detail-photo-note { display:none; margin-top:8px; font-size:12px; color:var(--text-sub); }
-  .photo-lightbox {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.88);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 9999; cursor: zoom-out;
-  }
-  .photo-lightbox img { max-width: 94vw; max-height: 90vh; border-radius: var(--radius); }
-
-  /* ── Value tags ── */
-  .tag-cheap  { background:#e8f0eb; color:#2d5a3d; }
-  .tag-valuable { background:#fdf0f0; color:#8b1a1a; }
-
-  /* ── Public page ── */
-  #public-page {
-    display:none; position:fixed; inset:0; z-index:500;
-    background:var(--bg); overflow-y:auto;
-  }
-  #public-page.open { display:block; }
-  .pub-hero {
-    background:var(--accent); color:#fff;
-    padding:24px 20px 20px;
-  }
-  .pub-hero h1 { font-size:18px; font-weight:700; margin-bottom:4px; }
-  .pub-hero p  { font-size:12px; opacity:.85; }
-  .pub-content { max-width:640px; margin:0 auto; padding:20px 16px 60px; }
-  .pub-filter  { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
-  .pub-search  {
-    flex:1; min-width:140px;
-    border:1px solid var(--border-strong); border-radius:var(--radius);
-    padding:8px 12px; font-family:inherit; font-size:13px;
-    background:var(--surface);
-  }
-  .pub-search:focus { outline:none; border-color:var(--accent); }
-  .pub-card {
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:var(--radius-lg); padding:16px;
-    margin-bottom:10px; box-shadow:var(--shadow);
-  }
-  .pub-card-head {
-    display:flex; align-items:flex-start;
-    justify-content:space-between; gap:8px; margin-bottom:8px;
-  }
-  .pub-item-name { font-size:15px; font-weight:700; }
-  .pub-meta { font-size:12px; color:var(--text-sub); margin-top:3px; }
-  .pub-detail { font-size:12px; color:var(--text-sub); margin-top:6px; line-height:1.6; }
-  .pub-box {
-    margin-top:10px; padding:10px 12px;
-    background:var(--accent-light); border-radius:var(--radius);
-    font-size:13px; font-weight:700; color:var(--accent);
-  }
-  .pub-valuable-box {
-    margin-top:10px; padding:10px 12px;
-    background:var(--warning-bg); border-radius:var(--radius);
-    font-size:12px; color:var(--warning); line-height:1.6;
-  }
-  .pub-close-btn {
-    position:fixed; bottom:20px; right:20px;
-    background:var(--accent); color:#fff;
-    border:none; border-radius:99px; padding:12px 22px;
-    font-family:inherit; font-size:13px; font-weight:700;
-    cursor:pointer; box-shadow:var(--shadow-md); z-index:600;
-  }
-  @media(max-width:640px){
-    .pub-hero { padding:18px 14px 16px; }
-    .pub-hero h1 { font-size:16px; }
-    .pub-content { padding:14px 12px 80px; }
-  }
-
-  .urgency-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
-  .urgency-high { background: var(--danger-bg); color: var(--danger); }
-  .urgency-normal { background: var(--bg); color: var(--text-muted); }
-
-
-  /* ── Mobile quick actions ── */
-  .mobile-quick-actions { display:none; }
-  .mobile-quick-actions.hidden { display:none !important; }
-  @media (max-width: 640px) {
-    .mobile-quick-actions {
-      display:flex;
-      position:fixed;
-      right:12px;
-      bottom:74px;
-      z-index:260;
-      flex-direction:column;
-      gap:8px;
-    }
-    .mobile-quick-actions.hidden { display:none !important; }
-    .mq-btn {
-      border:none;
-      border-radius:999px;
-      padding:10px 14px;
-      box-shadow: var(--shadow-md);
-      font-family: inherit;
-      font-size:12px;
-      font-weight:700;
-      cursor:pointer;
-      background: var(--surface);
-      color: var(--text);
-      border:1px solid var(--border-strong);
-      min-width: 92px;
-    }
-    .mq-btn.primary {
-      background: var(--accent);
-      color:#fff;
-      border-color: var(--accent);
-    }
-
-    .modal-overlay { align-items: flex-end; }
-    .modal {
-      width: 100vw;
-      max-width: 100vw;
-      max-height: 100dvh;
-      height: min(100dvh, 100vh);
-      border-radius: 16px 16px 0 0;
-    }
-    .modal-header {
-      position: sticky;
-      top: 0;
-      background: var(--surface);
-      z-index: 2;
-    }
-    .modal-body {
-      padding: 14px 14px 88px;
-      -webkit-overflow-scrolling: touch;
-    }
-    .modal-footer {
-      position: sticky;
-      bottom: 0;
-      background: var(--surface);
-      padding-bottom: calc(12px + env(safe-area-inset-bottom));
-      z-index: 2;
-    }
-    .photo-source-row { flex-direction: column; }
-    .photo-source-btn { min-height: 54px; }
-  }
-
-
-  .mobile-save-bar { display:none; }
-  @media (max-width: 640px) {
-    .mobile-save-bar {
-      display:block;
-      position: sticky;
-      bottom: 0;
-      margin-top: 14px;
-      padding-top: 12px;
-      background: linear-gradient(to top, var(--surface) 75%, rgba(255,255,255,0));
-      z-index: 2;
-    }
-    .mobile-save-bar .btn {
-      width: 100%;
-      justify-content: center;
-      min-height: 52px;
-      font-size: 16px;
-    }
-  }
-
-
-/* ── Staff helper link ── */
-body.staff-mode .topbar .actions a.btn { text-decoration: none; }
-
-
-  /* ── Photo thumbnails / mobile cards ── */
-  .ledger-card-list { display:none; }
-  .photo-cell { width:72px; }
-  .ledger-thumb, .pub-thumb {
-    width:56px; height:56px; object-fit:cover; border-radius:10px;
-    border:1px solid var(--border); background:var(--bg); display:block;
-    cursor:pointer;
-  }
-  .ledger-thumb.placeholder, .pub-thumb.placeholder {
-    display:flex; align-items:center; justify-content:center;
-    color:var(--text-muted); font-size:18px;
-  }
-  .ledger-card-list { gap:12px; flex-direction:column; }
-  .ledger-card {
-    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
-    box-shadow:var(--shadow); padding:14px;
-  }
-  .ledger-card-top { display:flex; gap:12px; align-items:flex-start; }
-  .ledger-card-main { min-width:0; flex:1; }
-  .ledger-card-title { font-size:15px; font-weight:700; line-height:1.45; }
-  .ledger-card-meta { margin-top:4px; font-size:12px; color:var(--text-sub); }
-  .ledger-card-grid {
-    display:grid; grid-template-columns:1fr 1fr; gap:10px 12px; margin-top:12px;
-  }
-  .ledger-card-field { min-width:0; }
-  .ledger-card-label { font-size:10px; font-weight:700; color:var(--text-muted); letter-spacing:.05em; text-transform:uppercase; margin-bottom:2px; }
-  .ledger-card-value { font-size:13px; font-weight:500; word-break:break-word; }
-  .ledger-card-actions { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
-  .detail-photo {
-    width:100%; max-height:70vh; object-fit:contain; background:var(--bg);
-    border-radius: var(--radius); border: 1px solid var(--border); cursor: zoom-in; display: block;
-  }
-  .detail-photo-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
-  .photo-action-btn {
-    display:inline-flex; align-items:center; justify-content:center; gap:6px;
-    min-height:40px; padding:8px 12px; border-radius:10px;
-    border:1px solid var(--border-strong); background:var(--surface); color:var(--text);
-    font-family:inherit; font-size:13px; font-weight:700; cursor:pointer;
-    text-decoration:none;
-  }
-  .photo-action-btn:hover { background:var(--bg); }
-  .pub-photo-row { display:flex; gap:12px; align-items:center; margin-top:10px; }
-  .pub-photo-actions { display:flex; flex-direction:column; gap:8px; }
-  .pub-photo-note { font-size:11px; color:var(--text-muted); line-height:1.5; }
-  .detail-photo-link { display:none; }
-
-  @media (max-width: 640px) {
-    #page-ledger .table-wrap { display:none; }
-    #page-ledger .ledger-card-list { display:flex; }
-    .ledger-card-grid { grid-template-columns:1fr; gap:8px; }
-    .ledger-thumb, .pub-thumb { width:72px; height:72px; border-radius:12px; }
-    .ledger-card-title { font-size:16px; }
-    .ledger-card-value { font-size:14px; }
-    .modal { width:100vw; max-width:100vw; max-height:100dvh; border-radius:16px 16px 0 0; }
-    .modal-body { padding:14px; }
-    .modal-footer { padding:12px 14px calc(12px + env(safe-area-inset-bottom)); }
-    .card-header { gap:8px; flex-wrap:wrap; align-items:flex-start; }
-    .card-header .btn { width:100%; justify-content:center; min-height:42px; }
-    .topbar h2 { line-height:1.35; }
-    .pub-photo-row { align-items:flex-start; }
-    .pub-photo-actions { flex:1; }
-    .photo-action-btn { width:100%; }
-  }
-
 </style>
 </head>
-<body class="staff-mode" data-role="staff">
-<!-- GitHub Pages 公開用版 -->
-
-<div class="app">
-  <!-- Sidebar -->
-  <nav class="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-mark"><span>📦</span></div>
-      <h1>忘れ物管理</h1>
-      <p>Lost & Found System</p>
-    </div>
-    <div class="sidebar-nav">
-      <div class="nav-group">
-        <div class="nav-label">メニュー</div>
-        <div class="nav-item active" onclick="showPage('dashboard')">
-          <span class="icon">📊</span> ダッシュボード
-        </div>
-        <div class="nav-item" onclick="showPage('form')">
-          <span class="icon">📝</span> 問い合わせ受付
-        </div>
-        <div class="nav-item" onclick="showPage('ledger')">
-          <span class="icon">📋</span> 忘れ物台帳
-          <span class="nav-badge" id="pending-badge">3</span>
-        </div>
-        <div class="nav-item" onclick="showPage('sop')">
-          <span class="icon">🔍</span> 確認SOP
-        </div>
-      </div>
-      <div class="nav-group" style="margin-top:8px;">
-        <div class="nav-label">設定・出力</div>
-        <div class="nav-item" onclick="openPublicPage()">
-          <span class="icon">👁️</span> 公開ページ
-        </div>
-        <div class="nav-item" onclick="showPage('gas')">
-          <span class="icon">⚙️</span> GAS連携
-        </div>
-      </div>
-    </div>
-  </nav>
-
-  <!-- Main -->
-  <main class="main">
-    <div class="topbar">
-      <h2 id="page-title">ダッシュボード</h2>
-      <div class="actions">
-        <a class="btn btn-secondary btn-sm" href="./index.html">👤 お客さん用フォーム</a>
-        <span id="sync-status" style="font-size:11px;color:var(--text-muted);display:none;"></span>
-        <button class="btn btn-secondary btn-sm" id="topbar-sync-btn" onclick="loadFromGAS()" title="スプレッドシートから最新データを読み込む">🔄 同期</button>
-        <button class="btn btn-secondary btn-sm" id="topbar-form-btn" onclick="showPage('form')">＋ 新規問い合わせ</button>
-        <button class="btn btn-primary btn-sm" id="topbar-ledger-btn" onclick="openLedgerModal()">＋ 発見品を登録</button>
-      </div>
-    </div>
-
-    <div class="content">
-
-      <!-- Dashboard -->
-      <div id="page-dashboard" class="page active">
-        <div class="stats-grid">
-          <div class="stat-card yellow">
-            <div class="label">対応中</div>
-            <div class="value" id="stat-searching">3</div>
-            <div class="sub">確認・捜索中</div>
-          </div>
-          <div class="stat-card green">
-            <div class="label">発見済み</div>
-            <div class="value" id="stat-found">2</div>
-            <div class="sub">返却待ち含む</div>
-          </div>
-          <div class="stat-card blue">
-            <div class="label">返却完了</div>
-            <div class="value" id="stat-returned">8</div>
-            <div class="sub">今月</div>
-          </div>
-          <div class="stat-card gray">
-            <div class="label">期限切れ処分</div>
-            <div class="value" id="stat-disposed">1</div>
-            <div class="sub">今月</div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <h3>⚡ 要対応・緊急</h3>
-            <span style="font-size:11px;color:var(--text-muted);">緊急フラグあり / 未対応</span>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>管理番号</th>
-                  <th>問い合わせ日</th>
-                  <th>内容</th>
-                  <th>スタジオ</th>
-                  <th>緊急</th>
-                  <th>ステータス</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="urgent-list"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div style="margin-top:16px;" class="card">
-          <div class="card-header">
-            <h3>📋 最近の問い合わせ</h3>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>管理番号</th>
-                  <th>受付日</th>
-                  <th>忘れ物</th>
-                  <th>スタジオ</th>
-                  <th>返却方法</th>
-                  <th>ステータス</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="recent-list"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Form -->
-      <div id="page-form" class="page">
-        <div class="notice info" style="margin-bottom:20px;">
-          <span class="icon">ℹ️</span>
-          <div>このフォームはスタッフ・顧客向けの問い合わせ受付画面です。送信後に自動返信メッセージが表示されます。</div>
-        </div>
-
-        <div class="card">
-          <div class="card-header"><h3>📝 忘れ物お問い合わせフォーム</h3></div>
-          <div class="card-body">
-            <div class="form-grid">
-              <div class="form-section-title">■ ご利用情報</div>
-
-              <div class="form-group">
-                <label>利用日 <span class="req">*</span></label>
-                <input type="date" class="form-control" id="f-date">
-              </div>
-              <div class="form-group">
-                <label>利用時間 <span class="req">*</span></label>
-                <input type="hidden" id="f-time">
-                <div class="time-select-row">
-                  <select class="form-control" id="f-time-start" onchange="syncUseTime()">
-                    <option value="">開始時間を選択</option>
-                  </select>
-                  <span class="time-sep">〜</span>
-                  <select class="form-control" id="f-time-end" onchange="syncUseTime()">
-                    <option value="">終了時間を選択</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-group">
-                <label>予約名 <span class="req">*</span></label>
-                <input type="text" class="form-control" id="f-name" placeholder="山田 太郎">
-              </div>
-              <div class="form-group">
-                <label>店舗名 <span class="req">*</span></label>
-                <select class="form-control" id="f-store" onchange="updateInquiryRoomOptions()">
-                  <option value="">選択してください</option>
-                  <option>問屋町</option>
-                  <option>倉敷</option>
-                  <option>下中野</option>
-                  <option>表町</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>部屋名 <span class="req">*</span></label>
-                <select class="form-control" id="f-room">
-                  <option value="">先に店舗を選択してください</option>
-                </select>
-              </div>
-
-              <hr class="form-divider">
-              <div class="form-section-title">■ 忘れ物の詳細</div>
-
-              <div class="form-group full">
-                <label>忘れ物の内容 <span class="req">*</span></label>
-                <input type="text" class="form-control" id="f-item" placeholder="例：黒いトートバッグ">
-              </div>
-              <div class="form-group full">
-                <label>色・ブランド・特徴・中身など</label>
-                <textarea class="form-control" id="f-detail" placeholder="例：ナイキのリュック（黒×赤）、財布・スマホ入り、ファスナーに黄色いキーホルダー付き"></textarea>
-              </div>
-              <div class="form-group full">
-                <label>置いた可能性が高い場所</label>
-                <input type="text" class="form-control" id="f-location" placeholder="例：更衣室のロッカー付近、鏡の前の棚の上">
-              </div>
-              <div class="form-group full">
-                <label>写真（あれば添付）</label>
-                <div class="photo-source-row" id="f-photo-source-row">
-                  <button type="button" class="photo-source-btn" onclick="triggerInquiryPhotoInput('camera')">
-                    <span class="psb-icon">📷</span>カメラ撮影
-                  </button>
-                  <button type="button" class="photo-source-btn" onclick="triggerInquiryPhotoInput('gallery')">
-                    <span class="psb-icon">🖼️</span>ギャラリーから選択
-                  </button>
-                </div>
-                <input type="file" id="f-photo-input-camera" accept="image/*" capture="environment" style="display:none" onchange="handleInquiryPhoto(this)">
-                <input type="file" id="f-photo-input-gallery" accept="image/*" style="display:none" onchange="handleInquiryPhoto(this)">
-                <div class="photo-upload-area" id="f-photo-area" style="margin-top:8px;display:none;">
-                  <img id="f-photo-preview-img" src="" alt="問い合わせ写真プレビュー">
-                  <div class="photo-upload-overlay">
-                    <button type="button" class="photo-btn" onclick="triggerInquiryPhotoInput('gallery')">🔄 変更</button>
-                    <button type="button" class="photo-btn danger" onclick="removeInquiryPhoto()">🗑️ 削除</button>
-                  </div>
-                </div>
-                <div id="photo-preview" style="display:none;"></div>
-                <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">大きい写真は自動で軽くして送信します。</div>
-              </div>
-
-              <hr class="form-divider">
-              <div class="form-section-title">■ 連絡先・緊急性</div>
-
-              <div class="form-group">
-                <label>電話番号 <span class="req">*</span></label>
-                <input type="tel" class="form-control" id="f-tel" placeholder="090-0000-0000">
-              </div>
-              <div class="form-group">
-                <label>メールアドレス</label>
-                <input type="email" class="form-control" id="f-email" placeholder="example@email.com">
-              </div>
-              <div class="form-group full">
-                <label>緊急性</label>
-                <select class="form-control" id="f-urgency">
-                  <option value="normal">通常（24時間以内の回答で問題ない）</option>
-                  <option value="high">緊急（財布・スマホ・鍵など重要品）</option>
-                </select>
-              </div>
-
-              <hr class="form-divider">
-              <div class="form-section-title">■ 規約確認</div>
-
-              <div class="form-group full">
-                <div class="checkbox-group">
-                  <label class="checkbox-item">
-                    <input type="checkbox" id="c1">
-                    <span>貴重品の保管責任は利用者にあることを理解しました</span>
-                  </label>
-                  <label class="checkbox-item">
-                    <input type="checkbox" id="c2">
-                    <span>忘れ物の確認は清掃・次回巡回時に行われ、即時確認はできないことを理解しました</span>
-                  </label>
-                  <label class="checkbox-item">
-                    <input type="checkbox" id="c3">
-                    <span>保管期限は1か月であることを理解しました</span>
-                  </label>
-                  <label class="checkbox-item">
-                    <input type="checkbox" id="c4">
-                    <span>食品・飲料・衛生用品は即日処分される場合があることを理解しました</span>
-                  </label>
-                  <label class="checkbox-item">
-                    <input type="checkbox" id="c5">
-                    <span>返却時に本人確認書類の提示が必要なことを理解しました</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div style="margin-top:24px;display:flex;gap:10px;justify-content:flex-end;">
-              <button class="btn btn-secondary" onclick="resetForm()">リセット</button>
-              <button class="btn btn-primary" onclick="submitForm()">📤 送信する</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Auto Reply Preview (hidden panel) -->
-      <div id="autoReplyPanel" style="display:none; margin-top:20px;" class="card">
-        <div class="card-header"><h3>✅ 送信完了 — 自動返信メッセージ</h3></div>
-        <div class="card-body">
-          <div class="auto-reply-box">
-            <strong>【忘れ物お問い合わせ 自動返信】</strong>
-            この度はお問い合わせいただきありがとうございます。<br><br>
-            忘れ物の確認は、清掃・次回巡回時に行います。<br>
-            <strong>即時確認はできません</strong>のであらかじめご了承ください。<br><br>
-            通常 <strong>24時間以内</strong>にご連絡いたします。<br>
-            見つかった場合も、見つからなかった場合もご連絡いたします。<br><br>
-            ─────────────────────────<br>
-            ＜保管に関するご注意＞<br>
-            ・保管期限：受付から <strong>1か月</strong><br>
-            ・食品・飲料・衛生品は <strong>即日処分</strong>の場合があります<br>
-            ・返却時には <strong>本人確認書類</strong>が必要です<br>
-            ・貴重品の管理責任は利用者にあります<br>
-            ─────────────────────────<br><br>
-            引き続きよろしくお願いいたします。
-          </div>
-          <div style="margin-top:16px;display:flex;gap:8px;">
-            <button class="btn btn-primary" onclick="goToLedger()">📋 台帳へ進む</button>
-            <button class="btn btn-secondary" onclick="resetForm()">新規受付</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Ledger -->
-      <div id="page-ledger" class="page">
-        <div class="filters">
-          <input class="search-input" placeholder="🔍 物の名前・番号で検索" id="search-input" oninput="filterLedger()">
-          <select class="filter-select" id="filter-status" onchange="filterLedger()">
-            <option value="">すべてのステータス</option>
-            <option value="searching">確認中</option>
-            <option value="found">発見済み</option>
-            <option value="returned">返却済み</option>
-            <option value="disposed">処分済み</option>
-          </select>
-          <select class="filter-select" id="filter-urgency" onchange="filterLedger()">
-            <option value="">緊急性すべて</option>
-            <option value="high">緊急のみ</option>
-            <option value="normal">通常のみ</option>
-          </select>
-          <select class="filter-select" id="filter-return" onchange="filterLedger()">
-            <option value="">返却方法すべて</option>
-            <option value="store">店頭受取</option>
-            <option value="ship">着払い発送</option>
-            <option value="pending">未定</option>
-          </select>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <h3>📋 忘れ物台帳</h3>
-            <button class="btn btn-primary btn-sm" onclick="openLedgerModal()">＋ 発見品を登録</button>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>写真</th>
-                  <th>管理番号</th>
-                  <th>発見日</th>
-                  <th>物の内容</th>
-                  <th>区分</th>
-                  <th>発見場所</th>
-                  <th>問い合わせ者</th>
-                  <th>返却方法</th>
-                  <th>保管期限</th>
-                  <th>ステータス</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="ledger-list"></tbody>
-            </table>
-          </div>
-          <div class="ledger-card-list" id="ledger-card-list"></div>
-        </div>
-      </div>
-
-      <!-- SOP -->
-      <div id="page-sop" class="page">
-        <div class="notice warning" style="margin-bottom:20px;">
-          <span class="icon">⚠️</span>
-          <div>問い合わせが来るたびに確認するのではなく、<strong>清掃時・次回入室前・閉店時</strong>の既存タイミングで確認してください。</div>
-        </div>
-
-        <div class="sop-two-col">
-          <div class="card">
-            <div class="card-header">
-              <h3>🔍 確認チェックリスト</h3>
-              <button class="btn btn-secondary btn-sm" onclick="resetSOP()">リセット</button>
-            </div>
-            <div class="card-body">
-              <div class="sop-list" id="sop-list"></div>
-              <div style="margin-top:16px;">
-                <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;" id="sop-progress-text">0 / 10 完了</div>
-                <div style="height:6px;background:var(--bg);border-radius:99px;overflow:hidden;">
-                  <div id="sop-progress-bar" style="height:100%;background:var(--accent);border-radius:99px;width:0%;transition:width 0.3s;"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header"><h3>⏰ 巡回タイミング</h3></div>
-            <div class="card-body">
-              <div style="display:flex;flex-direction:column;gap:12px;">
-                <div style="padding:12px;background:var(--accent-light);border-radius:var(--radius);border:1px solid #b8d4c8;">
-                  <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:4px;">🧹 清掃時（毎回）</div>
-                  <div style="font-size:12px;color:var(--text-sub);">各スタジオの清掃完了前に全箇所チェック。台帳へ記録。</div>
-                </div>
-                <div style="padding:12px;background:var(--warning-bg);border-radius:var(--radius);border:1px solid #f0d080;">
-                  <div style="font-size:12px;font-weight:700;color:var(--warning);margin-bottom:4px;">🚪 次回入室前</div>
-                  <div style="font-size:12px;color:var(--text-sub);">次の予約者入室前に前回の利用痕跡を確認。</div>
-                </div>
-                <div style="padding:12px;background:var(--info-bg);border-radius:var(--radius);border:1px solid #b8d4ea;">
-                  <div style="font-size:12px;font-weight:700;color:var(--info);margin-bottom:4px;">🌙 閉店時</div>
-                  <div style="font-size:12px;color:var(--text-sub);">全スタジオ・共用エリアを一括確認。日次台帳を締める。</div>
-                </div>
-                <div class="notice info" style="margin-top:4px;">
-                  <span class="icon">💡</span>
-                  <div>個別の問い合わせ毎に探しに行くのは<strong>しない</strong>。巡回タイミングにまとめて確認する。</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card" style="margin-top:16px;">
-          <div class="card-header"><h3>📨 見つかった場合の返信テンプレート</h3></div>
-          <div class="card-body">
-            <div class="auto-reply-box">
-              <strong>【忘れ物発見のご連絡】</strong>
-              ○○様、お問い合わせいただきました忘れ物が見つかりました。<br><br>
-              【発見物】[物の名前・特徴]<br>
-              【発見場所】[場所]<br>
-              【保管期限】[日付]まで<br><br>
-              ご返却方法をお選びください：<br>
-              ①　店頭受取（営業時間内にお越しください）<br>
-              ②　着払い発送（ご希望の場合はお送り先をご連絡ください）<br><br>
-              ご来店・ご連絡の際には<strong>本人確認書類</strong>が必要です。<br>
-              ─────────────────────────<br>
-              ※ 食品・飲料・衛生品は保管できない場合があります。<br>
-              ※ 保管期限を過ぎた場合は処分いたします。<br>
-              ※ 貴重品の管理責任は利用者にあります。
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- GAS -->
-      <div id="page-gas" class="page">
-        <div class="notice info" style="margin-bottom:20px;">
-          <span class="icon">⚙️</span>
-          <div>以下のGASコードをGoogle Apps Scriptにコピー&ペーストすることで、Googleフォーム→スプレッドシート自動記録・LINE通知が実現できます。</div>
-        </div>
-
-        <div class="card" style="margin-bottom:16px;">
-          <div class="card-header"><h3>🔗 WebアプリURL設定</h3></div>
-          <div class="card-body">
-            <div class="form-grid" style="grid-template-columns:1fr auto;align-items:end;">
-              <div class="form-group full" style="grid-column:1 / -1;">
-                <label>GASウェブアプリURL（ここに貼ってください）</label>
-                <input type="url" class="form-control" id="gas-endpoint-input" placeholder="ここにGASウェブアプリURLを貼ってください（https://script.google.com/macros/s/xxxxxxxxxxxxxxxx/exec）">
-                <div style="font-size:12px;color:var(--text-sub);margin-top:6px;">Google Apps Script を <strong>ウェブアプリとしてデプロイ</strong> したURLを入れてください。保存すると、このブラウザに記憶されます。</div>
-              </div>
-              <div class="form-group">
-                <button class="btn btn-primary" type="button" onclick="saveGasEndpointSetting()">💾 URLを保存</button>
-              </div>
-              <div class="form-group">
-                <button class="btn btn-secondary" type="button" onclick="clearGasEndpointSetting()">🗑️ クリア</button>
-              </div>
-            </div>
-            <div style="margin-top:8px;font-size:12px;color:var(--warning);font-weight:700;">※ Apps Script をウェブアプリとしてデプロイした後のURLをここに貼ってください</div><div id="gas-endpoint-current" style="margin-top:10px;font-size:12px;color:var(--text-sub);"></div>
-          </div>
-        </div>
-
-        <div class="tabs">
-          <div class="tab active" onclick="switchGasTab(0)">フォーム連携</div>
-          <div class="tab" onclick="switchGasTab(1)">LINE通知</div>
-          <div class="tab" onclick="switchGasTab(2)">自動返信メール</div>
-          <div class="tab" onclick="switchGasTab(3)">期限チェック</div>
-          <div class="tab" onclick="switchGasTab(4)">📷 写真保存</div>
-          <div class="tab" onclick="switchGasTab(5)">🔄 台帳同期</div>
-        </div>
-
-        <div id="gas-tab-0" class="gas-tab card">
-          <div class="card-header"><h3>📊 Googleフォーム → スプレッドシート自動記録</h3></div>
-          <div class="card-body">
-            <p style="font-size:12px;color:var(--text-sub);margin-bottom:12px;">Googleフォームの送信トリガーに設定してください。管理番号の自動採番・全項目の転記を行います。</p>
-            <pre style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.7;overflow-x:auto;color:var(--text);">// ============================================
-// 忘れ物管理 - フォーム送信トリガー
-// Googleフォームの「送信時」トリガーに設定
-// ============================================
-
-const SHEET_ID = 'YOUR_SPREADSHEET_ID'; // ★ 変更してください
-const SHEET_NAME = '忘れ物台帳';
-
-function onFormSubmit(e) {
-  const ss = SpreadsheetApp.openById(SHEET_ID);
-  const sheet = ss.getSheetByName(SHEET_NAME);
-  const responses = e.response.getItemResponses();
-
-  // 管理番号の自動採番
-  const lastRow = sheet.getLastRow();
-  const newNum = String(lastRow).padStart(4, '0');
-  const manageId = 'LF-' + Utilities.formatDate(
-    new Date(), 'Asia/Tokyo', 'yyyyMMdd'
-  ) + '-' + newNum;
-
-  // フォーム回答を取得
-  const data = {};
-  responses.forEach(r => {
-    data[r.getItem().getTitle()] = r.getResponse();
-  });
-
-  // スプレッドシートに書き込み
-  sheet.appendRow([
-    manageId,                          // 管理番号
-    new Date(),                        // 受付日時
-    data['利用日'] || '',
-    data['スタジオ名・部屋名'] || '',
-    data['予約名'] || '',
-    data['忘れ物の内容'] || '',
-    data['色・ブランド・特徴'] || '',
-    data['置いた場所'] || '',
-    data['連絡先（電話）'] || '',
-    data['連絡先（メール）'] || '',
-    data['緊急性'] || '通常',
-    '',   // 発見日（後で記入）
-    '',   // 発見場所（後で記入）
-    '',   // 返却方法（後で記入）
-    Utilities.formatDate(
-      new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000),
-      'Asia/Tokyo', 'yyyy/MM/dd'
-    ),    // 保管期限（14日後）
-    '確認中' // ステータス
-  ]);
-
-  // 緊急の場合はLINE通知
-  if (data['緊急性'] === '緊急') {
-    sendLineNotify(manageId, data);
-  }
-}
-</pre>
-            <button class="btn btn-secondary btn-sm" onclick="copyCode(0)" style="margin-top:10px;">📋 コピー</button>
-          </div>
-        </div>
-
-        <div id="gas-tab-1" class="gas-tab card" style="display:none;">
-          <div class="card-header"><h3>📱 LINE通知（緊急時・発見時）</h3></div>
-          <div class="card-body">
-            <div class="notice warning" style="margin-bottom:12px;">
-              <span class="icon">⚠️</span>
-              <div>LINE Messaging APIのチャンネルアクセストークンが必要です。LINE Developersで取得してください。</div>
-            </div>
-            <pre style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.7;overflow-x:auto;color:var(--text);">// ============================================
-// LINE通知送信
-// ============================================
-
-const LINE_TOKEN = 'YOUR_LINE_CHANNEL_ACCESS_TOKEN'; // ★
-const LINE_USER_ID = 'YOUR_LINE_USER_OR_GROUP_ID';   // ★
-
-function sendLineNotify(manageId, data) {
-  const message = [
-    '🚨【緊急】忘れ物問い合わせ',
-    '─────────────',
-    '管理番号: ' + manageId,
-    '予約名: ' + (data['予約名'] || '-'),
-    'スタジオ: ' + (data['スタジオ名・部屋名'] || '-'),
-    '忘れ物: ' + (data['忘れ物の内容'] || '-'),
-    '連絡先: ' + (data['連絡先（電話）'] || '-'),
-    '─────────────',
-    '台帳で確認してください'
-  ].join('\n');
-
-  const payload = {
-    to: LINE_USER_ID,
-    messages: [{ type: 'text', text: message }]
-  };
-
-  UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + LINE_TOKEN
-    },
-    payload: JSON.stringify(payload)
-  });
-}
-
-// 発見時通知
-function notifyFound(manageId, itemName, location) {
-  const message = [
-    '✅【発見】忘れ物が見つかりました',
-    '─────────────',
-    '管理番号: ' + manageId,
-    '物品: ' + itemName,
-    '発見場所: ' + location,
-    '→ 台帳のステータスを更新してください'
-  ].join('\n');
-
-  // 同様にpush送信
-  sendLineMessage(message);
-}
-
-function sendLineMessage(text) {
-  UrlFetchApp.fetch('https://api.line.me/v2/bot/message/push', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + LINE_TOKEN
-    },
-    payload: JSON.stringify({
-      to: LINE_USER_ID,
-      messages: [{ type: 'text', text: text }]
-    })
-  });
-}
-</pre>
-            <button class="btn btn-secondary btn-sm" onclick="copyCode(1)" style="margin-top:10px;">📋 コピー</button>
-          </div>
-        </div>
-
-        <div id="gas-tab-2" class="gas-tab card" style="display:none;">
-          <div class="card-header"><h3>📧 自動返信メール</h3></div>
-          <div class="card-body">
-            <pre style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.7;overflow-x:auto;color:var(--text);">// ============================================
-// 自動返信メール送信
-// onFormSubmit() 内から呼び出してください
-// ============================================
-
-const FROM_NAME = 'スタジオ名 忘れ物窓口';
-
-function sendAutoReply(email, name, manageId) {
-  if (!email) return;
-
-  const subject = '【忘れ物お問い合わせ】受付完了のご連絡 [' + manageId + ']';
-  const body = [
-    name + ' 様',
-    '',
-    'この度はお問い合わせいただきありがとうございます。',
-    '以下の内容で受け付けました。',
-    '',
-    '管理番号: ' + manageId,
-    '',
-    '━━━━━━━━━━━━━━━━━━━━━',
-    '■ 確認・回答について',
-    '━━━━━━━━━━━━━━━━━━━━━',
-    '忘れ物の確認は、清掃・次回巡回時に行います。',
-    '即時確認はできませんのであらかじめご了承ください。',
-    '',
-    '通常24時間以内にご連絡いたします。',
-    '見つかった場合も、見つからなかった場合もご連絡いたします。',
-    '',
-    '━━━━━━━━━━━━━━━━━━━━━',
-    '■ 保管に関するご注意',
-    '━━━━━━━━━━━━━━━━━━━━━',
-    '・保管期限：受付から1か月',
-    '・食品・飲料・衛生品は即日処分の場合があります',
-    '・返却時には本人確認書類が必要です',
-    '・貴重品の管理責任は利用者にあります',
-    '',
-    '引き続きよろしくお願いいたします。',
-    '',
-    '─────────────────',
-    FROM_NAME
-  ].join('\n');
-
-  GmailApp.sendEmail(email, subject, body, { name: FROM_NAME });
-}
-</pre>
-            <button class="btn btn-secondary btn-sm" onclick="copyCode(2)" style="margin-top:10px;">📋 コピー</button>
-          </div>
-        </div>
-
-        <div id="gas-tab-3" class="gas-tab card" style="display:none;">
-          <div class="card-header"><h3>⏰ 期限チェック（毎日自動実行）</h3></div>
-          <div class="card-body">
-            <p style="font-size:12px;color:var(--text-sub);margin-bottom:12px;">「時間主導のトリガー → 毎日」に設定すると、期限切れ・期限3日前の品をLINE通知します。</p>
-            <pre style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.7;overflow-x:auto;color:var(--text);">// ============================================
-// 毎日実行 - 保管期限チェック
-// トリガー: 時間主導 → 毎日 → 午前9時
-// ============================================
-
-function checkDeadlines() {
-  const ss = SpreadsheetApp.openById(SHEET_ID);
-  const sheet = ss.getSheetByName(SHEET_NAME);
-  const data = sheet.getDataRange().getValues();
-  const today = new Date();
-  today.setHours(0,0,0,0);
-
-  const warnings = [];
-  const expired = [];
-
-  // 2行目以降（ヘッダー除く）
-  for (let i = 1; i < data.length; i++) {
-    const row = data[i];
-    const status = row[15]; // ステータス列
-    if (status === '返却済み' || status === '処分済み') continue;
-
-    const deadline = new Date(row[14]); // 保管期限列
-    deadline.setHours(0,0,0,0);
-    const diffDays = Math.ceil((deadline - today) / (1000*60*60*24));
-
-    if (diffDays < 0) {
-      expired.push(row[0] + ' / ' + row[5]); // 管理番号 + 物品名
-    } else if (diffDays <= 3) {
-      warnings.push(row[0] + ' あと' + diffDays + '日 / ' + row[5]);
-    }
-  }
-
-  let msg = '';
-  if (expired.length > 0) {
-    msg += '🔴【期限切れ】処分対象\n' + expired.join('\n') + '\n\n';
-  }
-  if (warnings.length > 0) {
-    msg += '🟡【期限3日以内】要確認\n' + warnings.join('\n');
-  }
-
-  if (msg) sendLineMessage('⏰ 保管期限チェック\n─────────────\n' + msg);
-}
-</pre>
-            <button class="btn btn-secondary btn-sm" onclick="copyCode(3)" style="margin-top:10px;">📋 コピー</button>
-          </div>
-        </div>
-
-        <div id="gas-tab-4" class="gas-tab card" style="display:none;">
-          <div class="card-header"><h3>📷 写真をGoogleドライブに保存するGASコード</h3></div>
-          <div class="card-body">
-            <div class="notice info" style="margin-bottom:12px;">
-              <span class="notice-icon" style="font-size:14px;flex-shrink:0;">ℹ️</span>
-              <div style="font-size:12px;">スタッフが写真を撮影後、このエンドポイントにBase64データを送るとGoogleドライブに保存されます。スプレッドシートの写真URL列に自動記録されます。</div>
-            </div>
-            <pre style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.7;overflow-x:auto;color:var(--text);">// ============================================
-// 写真をGoogleドライブに保存 + 台帳URLを更新
-// GASをウェブアプリとして「全員」にデプロイ
-// ============================================
-
-const SHEET_ID        = 'YOUR_SPREADSHEET_ID';  // ★ 変更：スプレッドシートのID
-const SHEET_NAME      = '忘れ物台帳';               // ★ シート名（変更不要）
-const DRIVE_FOLDER_ID = 'YOUR_DRIVE_FOLDER_ID';  // ★ 変更：ドライブフォルダのID
-
-function doPost(e) {
-  try {
-    // Content-Type: text/plain でも application/json でも対応
-    const rawBody = e.postData ? e.postData.contents : '{}';
-    const params = JSON.parse(rawBody);
-    const base64 = params.imageBase64;   // "data:image/jpeg;base64,..." 形式
-    const manageId = params.manageId;    // 管理番号 例: LF-20260401-001
-    const mimeType = params.mimeType || 'image/jpeg';
-
-    // Base64 → Blob に変換
-    const base64Data = base64.split(',')[1];
-    const blob = Utilities.newBlob(
-      Utilities.base64Decode(base64Data),
-      mimeType,
-      manageId + '.jpg'
-    );
-
-    // Googleドライブに保存
-    const folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
-    const file = folder.createFile(blob);
-    file.setSharing(
-      DriveApp.Access.ANYONE_WITH_LINK,
-      DriveApp.Permission.VIEW
-    );
-    const fileUrl = 'https://drive.google.com/uc?id=' + file.getId();
-
-    // 台帳スプレッドシートの写真URL列を更新
-    const ss = SpreadsheetApp.openById(SHEET_ID);
-    const sheet = ss.getSheetByName(SHEET_NAME);
-    const data = sheet.getDataRange().getValues();
-    for (let i = 1; i < data.length; i++) {
-      if (data[i][0] === manageId) {
-        // H列（写真URL列 = 8列目）に書き込み
-        sheet.getRange(i + 1, 8).setValue(fileUrl);
-        break;
-      }
-    }
-
-    return ContentService
-      .createTextOutput(JSON.stringify({ success: true, url: fileUrl }))
-      .setMimeType(ContentService.MimeType.JSON);
-
-  } catch(err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ success: false, error: err.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-// GETリクエスト（疎通確認用）
-function doGet(e) {
-  return ContentService
-    .createTextOutput(JSON.stringify({ status: 'ok', message: '忘れ物写真アップロードAPI稼働中' }))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-// ============================================
-// Webアプリとしてデプロイする手順：
-// 1. Apps Script → 「デプロイ」→「新しいデプロイ」
-// 2. 種類：ウェブアプリ
-// 3. 次のユーザーとして実行：自分
-// 4. アクセスできるユーザー：全員（または組織内）
-// 5. デプロイ後に表示される「ウェブアプリURL」をコピー
-// 6. Webアプリの GAS_ENDPOINT 定数に貼り付ける
-// ============================================
-</pre>
-            <button class="btn btn-secondary btn-sm" onclick="copyCode(4)" style="margin-top:10px;">📋 コピー</button>
-
-            <div style="margin-top:16px;" class="card">
-              <div class="card-header"><h3>Webアプリ側の送信コード</h3></div>
-              <div class="card-body">
-                <p style="font-size:12px;color:var(--text-sub);margin-bottom:10px;">以下のコードを lost-item-system.html の &lt;script&gt; に追加すると、写真をGASに自動送信してドライブに永続保存できます。</p>
-                <pre style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.7;overflow-x:auto;color:var(--text);">// ★ GASウェブアプリのURLに変更してください
-const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwLgJXkdgBQw3jdgHNIxY3hJYxzwosXjwSaw6ogib9krn6JgAZaj7DIs9LU2gq2c-S5JA/exec';
-
-async function uploadPhotoToGAS(manageId, base64Data) {
-  // GASエンドポイント未設定の場合
-  if (!hasGasEndpoint()) {
-    showToast('⚠️ GASエンドポイント未設定。写真はブラウザ内のみ保存');
-    return null;
-  }
-
-  showToast('📤 写真をGoogleドライブに送信中...');
-  try {
-    const res = await fetch(GAS_ENDPOINT, {
-      method: 'POST',
-      mode: 'cors',
-      headers: { 'Content-Type': 'text/plain' }, // GASのCORSに合わせtext/plain
-      body: JSON.stringify({
-        imageBase64: base64Data,
-        manageId: manageId,
-        mimeType: 'image/jpeg'
-      })
-    });
-    const text = await res.text();
-    let json;
-    try { json = JSON.parse(text); } catch(pe) {
-      console.error('GASレスポンスのパース失敗:', text);
-      showToast('❌ GASからの応答が不正です。デプロイ設定を確認してください');
-      return null;
-    }
-    if (json && json.success) {
-      return json.url;
-    } else {
-      showToast('❌ 保存失敗: ' + (json && json.error ? json.error : '不明なエラー'));
-      return null;
-    }
-  } catch(e) {
-    console.error('写真アップロード失敗:', e);
-    // CORSエラーの可能性が高い → GASのデプロイ設定を案内
-    if (e.name === 'TypeError' && e.message.includes('fetch')) {
-      showToast('❌ 通信エラー。GASのデプロイ設定「アクセス：全員」を確認してください');
-    } else {
-      showToast('❌ 写真アップロード失敗: ' + e.message);
-    }
-    return null;
-  }
-}
-</pre>
-                <button class="btn btn-secondary btn-sm" onclick="copyCode(5)" style="margin-top:10px;">📋 コピー</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div id="gas-tab-5" class="gas-tab card" style="display:none;">
-          <div class="card-header"><h3>🔄 台帳データをスプレッドシートと同期するGASコード</h3></div>
-          <div class="card-body">
-            <div class="notice info" style="margin-bottom:12px;">
-              <span class="notice-icon" style="font-size:14px;flex-shrink:0;">ℹ️</span>
-              <div style="font-size:12px;">このGASをウェブアプリとしてデプロイすると、Webアプリの登録・更新データがスプレッドシートに保存され、どの端末からでも同じデータが見られるようになります。<br><strong>写真保存のGASと同じプロジェクトに追記してください。</strong></div>
-            </div>
-            <pre style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.7;overflow-x:auto;color:var(--text);">// ============================================
-// 台帳データ同期 API
-// 写真保存GASと同じプロジェクトに追記する
-// ============================================
-
-// doPost に以下のアクションを追加（既存のdoPostを置き換え）
-function doPost(e) {
-  try {
-    const rawBody = e.postData ? e.postData.contents : '{}';
-    const params = JSON.parse(rawBody);
-    const action = params.action;
-
-    // ── 台帳：1件保存 / 更新 ──
-    if (action === 'saveItem') {
-      return saveItem(params.item);
-    }
-    // ── 台帳：全件取得 ──
-    if (action === 'getAll') {
-      return getAllItems();
-    }
-    // ── 写真アップロード（既存） ──
-    if (action === 'uploadPhoto' || params.imageBase64) {
-      return uploadPhoto(params);
-    }
-
-    return jsonResponse({ success: false, error: 'unknown action' });
-  } catch(err) {
-    return jsonResponse({ success: false, error: err.toString() });
-  }
-}
-
-// ── 全件取得 ──
-function getAllItems() {
-  const ss = SpreadsheetApp.openById(SHEET_ID);
-  const sheet = ss.getSheetByName(SHEET_NAME);
-  const rows = sheet.getDataRange().getValues();
-  if (rows.length <= 1) return jsonResponse({ success: true, items: [] });
-
-  const headers = rows[0];
-  const items = rows.slice(1).map(row => {
-    const obj = {};
-    headers.forEach((h, i) => obj[h] = row[i] || '');
-    return obj;
-  });
-  return jsonResponse({ success: true, items: items });
-}
-
-// ── 1件保存 / 更新 ──
-function saveItem(item) {
-  const ss = SpreadsheetApp.openById(SHEET_ID);
-  const sheet = ss.getSheetByName(SHEET_NAME);
-  const rows = sheet.getDataRange().getValues();
-
-  // ヘッダー行がなければ作成
-  if (rows.length === 0) {
-    sheet.appendRow([
-      'id','inquiryDate','foundDate','place','item','detail',
-      'contact','returnMethod','urgency','status','deadline',
-      'value','publicName','boxNo','photoData','urgency'
-    ]);
-  }
-
-  // 既存行を検索（id一致）
-  for (let i = 1; i < rows.length; i++) {
-    if (rows[i][0] === item.id) {
-      // 更新
-      sheet.getRange(i + 1, 1, 1, 16).setValues([[
-        item.id, item.inquiryDate, item.foundDate, item.place,
-        item.item, item.detail, item.contact, item.returnMethod,
-        item.urgency, item.status, item.deadline,
-        item.value, item.publicName, item.boxNo, item.photoData || '', item.urgency
-      ]]);
-      return jsonResponse({ success: true, action: 'updated' });
-    }
-  }
-
-  // 新規追加
-  sheet.appendRow([
-    item.id, item.inquiryDate, item.foundDate, item.place,
-    item.item, item.detail, item.contact, item.returnMethod,
-    item.urgency, item.status, item.deadline,
-    item.value, item.publicName, item.boxNo, item.photoData || '', item.urgency
-  ]);
-  return jsonResponse({ success: true, action: 'created' });
-}
-
-// ── 写真アップロード（既存処理を関数化） ──
-function uploadPhoto(params) {
-  const base64 = params.imageBase64;
-  const manageId = params.manageId;
-  const mimeType = params.mimeType || 'image/jpeg';
-  const base64Data = base64.split(',')[1];
-  const blob = Utilities.newBlob(
-    Utilities.base64Decode(base64Data), mimeType, manageId + '.jpg'
-  );
-  const folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
-  const file = folder.createFile(blob);
-  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-  const fileUrl = 'https://drive.google.com/uc?id=' + file.getId();
-
-  // 台帳の photoData 列も更新
-  const ss = SpreadsheetApp.openById(SHEET_ID);
-  const sheet = ss.getSheetByName(SHEET_NAME);
-  const rows = sheet.getDataRange().getValues();
-  for (let i = 1; i < rows.length; i++) {
-    if (rows[i][0] === manageId) {
-      sheet.getRange(i + 1, 15).setValue(fileUrl); // O列 = photoData
-      break;
-    }
-  }
-  return jsonResponse({ success: true, url: fileUrl });
-}
-
-// ── doGet：疎通確認 ──
-function doGet(e) {
-  if (e.parameter.action === 'getAll') {
-    return getAllItems();
-  }
-  return jsonResponse({ status: 'ok', message: '忘れ物管理API稼働中' });
-}
-
-// ── レスポンスヘルパー ──
-function jsonResponse(obj) {
-  return ContentService
-    .createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-</pre>
-            <button class="btn btn-secondary btn-sm" onclick="copyCode(5)" style="margin-top:10px;">📋 コピー</button>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /content -->
-  </main>
-</div>
-
-
-<!-- 公開ページ（お客さん向け） -->
-<div id="public-page">
-  <div class="pub-hero">
-    <div style="display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <h1>📦 お忘れ物のご確認</h1>
-        <p>現在保管中の忘れ物一覧です。ご自身の忘れ物がある場合は下記をご確認ください。</p>
-      </div>
-    </div>
-  </div>
-  <div class="pub-content">
-    <div class="pub-filter">
-      <input class="pub-search" id="pub-search" placeholder="🔍 品物名で検索..." oninput="renderPublicPage()">
-      <select class="form-control" id="pub-filter-value" onchange="renderPublicPage()" style="flex:0 0 auto;width:auto;font-size:12px;padding:7px 28px 7px 10px;">
-        <option value="">すべて</option>
-        <option value="cheap">安価のみ</option>
-        <option value="valuable">高価のみ</option>
-      </select>
-    </div>
-
-    <div class="notice info" style="margin-bottom:16px;font-size:12px;">
-      <span style="font-size:14px;flex-shrink:0;">ℹ️</span>
-      <div>
-        <strong>安価な忘れ物</strong>はボックス番号をご確認のうえ、忘れ物ボックスから直接お引き取りください。<br>
-        <strong>高価な忘れ物</strong>は詳細を確認できません。心当たりがある場合は<a href="#" onclick="closePublicPage();showPage('form');return false;" style="color:var(--info);font-weight:700;">問い合わせフォーム</a>からご連絡ください。
-      </div>
-    </div>
-
-    <div id="pub-list"></div>
-
-    <div style="margin-top:24px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);">
-      <div style="font-size:13px;font-weight:700;margin-bottom:8px;">お探しの忘れ物が見つからない場合</div>
-      <div style="font-size:12px;color:var(--text-sub);margin-bottom:12px;line-height:1.6;">
-        まだ発見されていない可能性があります。専用フォームからお問い合わせください。
-        清掃・巡回時に確認し、24時間以内にご連絡いたします。
-      </div>
-      <button class="btn btn-primary" onclick="closePublicPage();showPage('form');">📝 問い合わせフォームへ</button>
-    </div>
-  </div>
-  <button class="pub-close-btn" onclick="closePublicPage()">✕ 閉じる（スタッフ画面）</button>
-</div>
-
-<!-- 台帳登録モーダル -->
-<div class="modal-overlay" id="ledger-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>📋 発見品を登録 / ステータス更新</h3>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-group">
-          <label>発見日 <span class="req">*</span></label>
-          <input type="date" class="form-control" id="m-found-date">
-        </div>
-        <div class="form-group">
-          <label>店舗名 <span class="req">*</span></label>
-          <select class="form-control" id="m-store" onchange="updateFoundRoomOptions()">
-            <option value="">選択してください</option>
-            <option>問屋町</option>
-            <option>倉敷</option>
-            <option>下中野</option>
-            <option>表町</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>部屋名 <span class="req">*</span></label>
-          <select class="form-control" id="m-room">
-            <option value="">先に店舗を選択してください</option>
-          </select>
-        </div>
-        <div class="form-group full">
-          <label>物の内容 <span class="req">*</span></label>
-          <input type="text" class="form-control" id="m-item-name" placeholder="例：黒いトートバッグ">
-        </div>
-        <div class="form-group full">
-          <label>特徴・詳細</label>
-          <textarea class="form-control" id="m-item-detail" placeholder="色・ブランド・中身など"></textarea>
-        </div>
-
-        <div class="form-group full">
-          <label>写真を撮影・添付</label>
-          <!-- カメラ・ギャラリー選択ボタン -->
-          <div class="photo-source-row" id="m-photo-source-row">
-            <button type="button" class="photo-source-btn" onclick="triggerPhotoInput('camera')">
-              <span class="psb-icon">📷</span>カメラ撮影
-            </button>
-            <button type="button" class="photo-source-btn" onclick="triggerPhotoInput('gallery')">
-              <span class="psb-icon">🖼️</span>ギャラリーから選択
-            </button>
-          </div>
-          <input type="file" id="m-photo-input-camera"  accept="image/*" capture="environment" style="display:none" onchange="handleModalPhoto(this)">
-          <input type="file" id="m-photo-input-gallery" accept="image/*" style="display:none" onchange="handleModalPhoto(this)">
-          <!-- プレビュー -->
-          <div class="photo-upload-area" id="m-photo-area" style="margin-top:8px;display:none;">
-            <img id="m-photo-preview" src="" alt="写真プレビュー">
-            <div class="photo-upload-overlay">
-              <button class="photo-btn" onclick="triggerPhotoInput('gallery')">🔄 変更</button>
-              <button class="photo-btn danger" onclick="removeModalPhoto()">🗑️ 削除</button>
-            </div>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>問い合わせ者名</label>
-          <input type="text" class="form-control" id="m-contact-name" placeholder="山田 太郎（不明な場合は空欄）">
-        </div>
-        <div class="form-group">
-          <label>返却方法</label>
-          <select class="form-control" id="m-return-method">
-            <option value="pending">未定</option>
-            <option value="store">店頭受取</option>
-            <option value="ship">着払い発送</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>緊急性</label>
-          <select class="form-control" id="m-urgency">
-            <option value="normal">通常</option>
-            <option value="high">緊急</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>ステータス</label>
-          <select class="form-control" id="m-status">
-            <option value="found">発見済み</option>
-            <option value="returned">返却済み</option>
-            <option value="disposed">処分済み</option>
-            <option value="searching">確認中</option>
-          </select>
-        </div>
-        <div class="form-group full" style="margin-top:4px;padding-top:12px;border-top:1px solid var(--border);">
-          <label style="font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted);font-weight:700;">公開ページ設定</label>
-        </div>
-        <div class="form-group full">
-          <label>価値区分 <span class="req">*</span></label>
-          <select class="form-control" id="m-value" onchange="toggleBoxNo()">
-            <option value="cheap">安価（公開ページに詳細表示・ボックス番号あり）</option>
-            <option value="valuable">高価（公開ページに品物名のみ表示・要問い合わせ）</option>
-          </select>
-        </div>
-        <div class="form-group full">
-          <label>公開表示名 <span class="req">*</span><span style="font-size:10px;font-weight:400;margin-left:6px;color:var(--text-muted);">お客さんの公開ページに表示される名前</span></label>
-          <input type="text" class="form-control" id="m-public-name" placeholder="例：水筒、傘、ヨガマット">
-        </div>
-        <div class="form-group full" id="box-no-group">
-          <label>忘れ物ボックス番号<span style="font-size:10px;font-weight:400;margin-left:6px;color:var(--text-muted);">安価品のみ：お客さんが直接引き取るボックス</span></label>
-          <input type="text" class="form-control" id="m-box-no" placeholder="例：A-1、B-3">
-        </div>
-      </div>
-      <div class="mobile-save-bar">
-        <button class="btn btn-primary" type="button" onclick="saveLedger()">✅ この内容で登録する</button>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>
-      <button class="btn btn-primary" onclick="saveLedger()">✅ 登録する</button>
-    </div>
-  </div>
-</div>
-
-<!-- 詳細モーダル -->
-<div class="modal-overlay" id="detail-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <h3 id="detail-title">詳細</h3>
-      <button class="modal-close" onclick="closeDetailModal()">✕</button>
-    </div>
-    <div class="modal-body" id="detail-body"></div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" id="detail-delete-btn" style="display:none;margin-right:auto;" onclick="deleteCurrentItem()">🗑️ 削除</button>
-      <button class="btn btn-secondary" onclick="closeDetailModal()">閉じる</button>
-      <button class="btn btn-primary" onclick="updateStatus()">ステータス更新</button>
-    </div>
-  </div>
-</div>
-
-<!-- Bottom Navigation (mobile) -->
-<nav class="bottom-nav" id="bottom-nav">
-  <div class="bn-item active" onclick="showPage('dashboard')" id="bn-dashboard">
-    <span class="bn-icon">📊</span><span>ホーム</span>
-  </div>
-  <div class="bn-item" onclick="showPage('form')" id="bn-form">
-    <span class="bn-icon">📝</span><span>受付</span>
-  </div>
-  <div class="bn-item" onclick="showPage('ledger')" id="bn-ledger">
-    <span class="bn-icon">📋</span><span>台帳</span>
-    <span class="bn-badge" id="bn-badge">3</span>
-  </div>
-  <div class="bn-item" onclick="showPage('sop')" id="bn-sop">
-    <span class="bn-icon">🔍</span><span>SOP</span>
-  </div>
-  <div class="bn-item" onclick="openPublicPage()" id="bn-public">
-    <span class="bn-icon">👁️</span><span>公開</span>
-  </div>
-  <div class="bn-item" onclick="showPage('gas')" id="bn-gas">
-    <span class="bn-icon">⚙️</span><span>GAS</span>
-  </div>
-</nav>
-<div class="mobile-quick-actions" id="mobile-quick-actions" aria-label="モバイル操作ボタン">
-  <button class="mq-btn" id="mobile-sync-btn" onclick="loadFromGAS()">🔄 同期</button>
-  <button class="mq-btn primary" id="mobile-ledger-btn" onclick="openLedgerModal()">＋ 登録</button>
-</div>
-<div class="toast-container" id="toast-container"></div>
-
+<body>
 <script src="./config.js"></script>
-<script>
-// ── Data ──
-let ledgerData = [
-  { id:'LF-20260401-001', foundDate:'2026/04/01', place:'更衣室', item:'黒いリュックサック', detail:'ナイキ製、財布入り', contact:'田中 花子', returnMethod:'store', urgency:'high', status:'found', deadline:'2026/04/15', inquiryDate:'2026/04/01', value:'valuable', publicName:'リュックサック', boxNo:'' },
-  { id:'LF-20260402-002', foundDate:'', place:'', item:'イヤホン（白）', detail:'AirPods Pro、ケースあり', contact:'鈴木 一郎', returnMethod:'ship', urgency:'normal', status:'searching', deadline:'2026/04/16', inquiryDate:'2026/04/02', value:'valuable', publicName:'イヤホン', boxNo:'' },
-  { id:'LF-20260402-003', foundDate:'', place:'', item:'水筒', detail:'象印製、赤色', contact:'佐藤 美咲', returnMethod:'pending', urgency:'normal', status:'searching', deadline:'2026/04/16', inquiryDate:'2026/04/02', value:'cheap', publicName:'水筒', boxNo:'B-3' },
-  { id:'LF-20260330-004', foundDate:'2026/03/31', place:'ロビー', item:'傘（折りたたみ）', detail:'紺色、ロゴなし', contact:'', returnMethod:'store', urgency:'normal', status:'returned', deadline:'2026/04/13', inquiryDate:'2026/03/30', value:'cheap', publicName:'傘', boxNo:'A-1' },
-  { id:'LF-20260328-005', foundDate:'2026/03/29', place:'スタジオB', item:'ヨガマット', detail:'ピンク色、薄型', contact:'高橋 明子', returnMethod:'store', urgency:'normal', status:'found', deadline:'2026/04/11', inquiryDate:'2026/03/28', value:'cheap', publicName:'ヨガマット', boxNo:'A-2' },
-];
-let nextId = 6;
-let editingIdx = null;
-
-const statusLabel = { found:'発見済み', searching:'確認中', returned:'返却済み', disposed:'処分済み', pending:'未定' };
-const statusClass = { found:'tag-found', searching:'tag-searching', returned:'tag-returned', disposed:'tag-disposed', pending:'tag-pending' };
-const returnLabel = { store:'店頭受取', ship:'着払い発送', pending:'未定' };
-const urgencyLabel = { high:'緊急', normal:'通常' };
-const valueLabel = { cheap:'安価', valuable:'高価' };
-const valueClass = { cheap:'tag-cheap', valuable:'tag-valuable' };
-
-const SOP_ITEMS = [
-  { text:'スタジオの中（隅々まで）', note:'棚・床・窓際を確認' },
-  { text:'コンセント周辺', note:'充電器・コードの忘れに注意' },
-  { text:'スタジオ出入口周辺', note:'ドア脇・マット下も確認' },
-  { text:'ロビー', note:'受付付近・待合椅子周辺' },
-  { text:'ソファ・椅子の下', note:'落下物・クッション間を確認' },
-  { text:'テーブルの下と上', note:'引き出し・棚の上も確認' },
-  { text:'洗面所・トイレ', note:'棚・フック・タンク上を確認' },
-  { text:'更衣室', note:'ロッカー内・フック・床を確認' },
-  { text:'ハンガーラック', note:'コート・バッグの忘れに注意' },
-  { text:'ゴミ箱の外側', note:'誤って置き忘れている場合あり' },
-];
-let sopChecked = new Array(SOP_ITEMS.length).fill(false);
-
-// ── GAS Runtime Config ──
-const GAS_ENDPOINT_PLACEHOLDER = 'YOUR_SCRIPT_ID';
-const CONFIG_GAS_ENDPOINT = (window.APP_CONFIG && window.APP_CONFIG.GAS_ENDPOINT ? String(window.APP_CONFIG.GAS_ENDPOINT).trim() : '');
-let GAS_ENDPOINT = localStorage.getItem('lostItemGasEndpoint') || CONFIG_GAS_ENDPOINT || GAS_ENDPOINT_PLACEHOLDER;
-
-function getGasEndpoint() {
-  return (GAS_ENDPOINT || '').trim();
-}
-
-function escapeHtml(str) {
-  return String(str || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function isValidGasEndpoint(url) {
-  return /^https:\/\/script\.google\.com\/macros\/s\//.test((url || '').trim());
-}
-
-function hasGasEndpoint() {
-  const endpoint = getGasEndpoint();
-  return !!(endpoint && !endpoint.includes(GAS_ENDPOINT_PLACEHOLDER) && isValidGasEndpoint(endpoint));
-}
-
-function ensureGasEndpointFromInput(options = {}) {
-  if (hasGasEndpoint()) return true;
-  const input = document.getElementById('gas-endpoint-input');
-  const typed = input ? input.value.trim() : '';
-  if (isValidGasEndpoint(typed)) {
-    updateGasEndpoint(typed, { silent: options.silent !== false });
-    return true;
-  }
-  return false;
-}
-
-function updateGasEndpoint(url, options = {}) {
-  const normalized = (url || '').trim();
-  GAS_ENDPOINT = normalized || GAS_ENDPOINT_PLACEHOLDER;
-
-  if (normalized) {
-    localStorage.setItem('lostItemGasEndpoint', normalized);
-  } else {
-    localStorage.removeItem('lostItemGasEndpoint');
-  }
-
-  const input = document.getElementById('gas-endpoint-input');
-  if (input && input.value !== normalized) input.value = normalized;
-
-  const current = document.getElementById('gas-endpoint-current');
-  if (current) {
-    current.innerHTML = normalized
-      ? '現在の接続先：<code style="word-break:break-all;">' + escapeHtml(normalized) + '</code>'
-      : '現在の接続先：未設定';
-  }
-
-  if (!options.silent) {
-    showSyncStatus(normalized ? '✅ GAS URLを保存しました' : 'ℹ️ GAS URLをクリアしました');
-  }
-}
-
-function saveGasEndpointSetting() {
-  const input = document.getElementById('gas-endpoint-input');
-  const url = input ? input.value.trim() : '';
-  if (!url) {
-    showToast('⚠️ GASのURLを入力してください');
-    return;
-  }
-  if (!isValidGasEndpoint(url)) {
-    showToast('⚠️ GASのウェブアプリURLを入力してください');
-    return;
-  }
-  updateGasEndpoint(url);
-  showToast('✅ GAS URLを保存しました');
-}
-
-function clearGasEndpointSetting() {
-  updateGasEndpoint('');
-  showToast('🗑️ GAS URLをクリアしました');
-}
-
-function initGasEndpointUI() {
-  const saved = localStorage.getItem('lostItemGasEndpoint') || CONFIG_GAS_ENDPOINT || '';
-  updateGasEndpoint(saved, { silent: true });
-}
-
-async function uploadPhotoToGAS(manageId, base64Data, photoField = 'photoData') {
-  if (!ensureGasEndpointFromInput()) {
-    showToast('⚠️ GAS URL未設定。写真はブラウザ内のみ保存');
-    return null;
-  }
-
-  showToast('📤 写真をGoogleドライブに送信中...');
-  try {
-    const result = await gasRequest({
-      action: 'uploadPhoto',
-      manageId: manageId,
-      photoField: photoField,
-      imageBase64: base64Data,
-      mimeType: (base64Data.match(/^data:(.*?);base64,/) || [])[1] || 'image/jpeg'
-    });
-
-    if (result && result.success) return result.url || '';
-
-    showToast('❌ 写真保存失敗: ' + (result && result.error ? result.error : '不明なエラー'));
-    return null;
-  } catch (e) {
-    console.error('写真アップロード失敗:', e);
-    showToast('❌ 写真アップロードに失敗しました');
-    return null;
-  }
-}
-
-// ── Pages ──
-function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.querySelectorAll('.bn-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-
-  const pageNames = { dashboard:'ダッシュボード', form:'問い合わせ受付', ledger:'忘れ物台帳', sop:'確認SOP', gas:'GAS連携' };
-  document.getElementById('page-title').textContent = pageNames[name] || name;
-
-  // サイドバー
-  const navMap = { dashboard:0, form:1, ledger:2, sop:3, gas:4 };
-  const items = document.querySelectorAll('.nav-item');
-  if (navMap[name] !== undefined) items[navMap[name]].classList.add('active');
-
-  // ボトムナビ
-  const bnEl = document.getElementById('bn-' + name);
-  if (bnEl) bnEl.classList.add('active');
-
-  if (name === 'dashboard') renderDashboard();
-  if (name === 'ledger') renderLedger();
-  if (name === 'sop') renderSOP();
-
-  updateActionVisibility(name);
-
-  // モバイル: 画面トップへスクロール
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function updateActionVisibility(pageName) {
-  const syncBtn = document.getElementById('topbar-sync-btn');
-  const formBtn = document.getElementById('topbar-form-btn');
-  const ledgerBtn = document.getElementById('topbar-ledger-btn');
-  const mobileActions = document.getElementById('mobile-quick-actions');
-
-  const showSync = pageName === 'dashboard' || pageName === 'ledger' || pageName === 'sop';
-  const showForm = pageName !== 'form';
-  const showLedger = pageName === 'dashboard' || pageName === 'ledger';
-
-  if (syncBtn) syncBtn.style.display = showSync ? '' : 'none';
-  if (formBtn) formBtn.style.display = showForm ? '' : 'none';
-  if (ledgerBtn) ledgerBtn.style.display = showLedger ? '' : 'none';
-
-  if (mobileActions) {
-    const shouldShowMobile = (pageName === 'dashboard' || pageName === 'ledger') && !isAnyModalOpen();
-    mobileActions.classList.toggle('hidden', !shouldShowMobile);
-  }
-}
-
-function isAnyModalOpen() {
-  return ['ledger-modal', 'detail-modal'].some(id => {
-    const el = document.getElementById(id);
-    return el && el.classList.contains('open');
-  });
-}
-
-function getCurrentPageName() {
-  const active = document.querySelector('.page.active');
-  return active ? active.id.replace('page-', '') : 'dashboard';
-}
-
-// ── Dashboard ──
-function renderDashboard() {
-  const searching = ledgerData.filter(d => d.status === 'searching').length;
-  const found = ledgerData.filter(d => d.status === 'found').length;
-  const returned = ledgerData.filter(d => d.status === 'returned').length;
-  const disposed = ledgerData.filter(d => d.status === 'disposed').length;
-
-  document.getElementById('stat-searching').textContent = searching;
-  document.getElementById('stat-found').textContent = found;
-  document.getElementById('stat-returned').textContent = returned;
-  document.getElementById('stat-disposed').textContent = disposed;
-  document.getElementById('pending-badge').textContent = searching;
-  const bnb = document.getElementById('bn-badge');
-  if (bnb) { bnb.textContent = searching; bnb.style.display = searching > 0 ? '' : 'none'; }
-
-  // urgent
-  const urgentList = document.getElementById('urgent-list');
-  const urgents = ledgerData.filter(d => d.urgency === 'high' && d.status !== 'returned' && d.status !== 'disposed');
-  urgentList.innerHTML = urgents.length ? urgents.map((d,i) => rowHtml(d, ledgerData.indexOf(d), true)).join('') : `<tr><td colspan="7" class="empty-state"><div class="emoji">✅</div><p>緊急案件はありません</p></td></tr>`;
-
-  const recentList = document.getElementById('recent-list');
-  const recent = [...ledgerData].reverse().slice(0, 5);
-  recentList.innerHTML = recent.map(d => rowHtml(d, ledgerData.indexOf(d), false)).join('');
-}
-
-function rowHtml(d, idx, isUrgent) {
-  if (isUrgent) {
-    return `<tr onclick="showDetail(${idx})">
-      <td class="td-id">${d.id}</td>
-      <td>${d.inquiryDate}</td>
-      <td class="td-main">${d.item}</td>
-      <td>${d.place || '-'}</td>
-      <td><span class="urgency-badge ${d.urgency==='high'?'urgency-high':'urgency-normal'}">${urgencyLabel[d.urgency]}</span></td>
-      <td><span class="tag ${statusClass[d.status]}">${statusLabel[d.status]}</span></td>
-      <td><button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();showDetail(${idx})">詳細</button></td>
-    </tr>`;
-  }
-  return `<tr onclick="showDetail(${idx})">
-    <td class="td-id">${d.id}</td>
-    <td>${d.inquiryDate}</td>
-    <td class="td-main">${d.item}<div class="td-sub">${d.detail||''}</div></td>
-    <td>${d.place||'確認中'}</td>
-    <td>${returnLabel[d.returnMethod]}</td>
-    <td><span class="tag ${statusClass[d.status]}">${statusLabel[d.status]}</span></td>
-    <td><button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();showDetail(${idx})">詳細</button></td>
-  </tr>`;
-}
-
-// ── Ledger ──
-function renderLedger(filtered) {
-  const data = filtered || ledgerData;
-  const tbody = document.getElementById('ledger-list');
-  const cardList = document.getElementById('ledger-card-list');
-
-  tbody.innerHTML = data.length ? data.map((d) => {
-    const idx = ledgerData.indexOf(d);
-    return `<tr onclick="showDetail(${idx})">
-      <td class="photo-cell">${renderThumbOnly(d.photoData, d.item, 'ledger-thumb')}</td>
-      <td class="td-id">${d.id}</td>
-      <td>${d.foundDate || '-'}</td>
-      <td class="td-main">${d.item}<div class="td-sub">${d.detail||''}</div></td>
-      <td><span class="tag ${valueClass[d.value||'cheap']}">${valueLabel[d.value||'cheap']}</span></td>
-      <td>${d.place || '-'}</td>
-      <td>${d.contact || '-'}</td>
-      <td>${returnLabel[d.returnMethod]}</td>
-      <td style="font-family:'DM Mono',monospace;font-size:12px;">${d.deadline}</td>
-      <td><span class="tag ${statusClass[d.status]}">${statusLabel[d.status]}</span></td>
-      <td><button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();showDetail(${idx})">詳細</button></td>
-    </tr>`;
-  }).join('') : `<tr><td colspan="11"><div class="empty-state"><div class="emoji">📦</div><p>該当する忘れ物はありません</p></div></td></tr>`;
-
-  if (cardList) {
-    cardList.innerHTML = data.length ? data.map((d) => {
-      const idx = ledgerData.indexOf(d);
-      return `<div class="ledger-card" onclick="showDetail(${idx})">
-        <div class="ledger-card-top">
-          ${d.photoData ? renderThumbOnly(d.photoData, d.item, 'ledger-thumb') : '<div class="ledger-thumb placeholder" aria-hidden="true">📦</div>'}
-          <div class="ledger-card-main">
-            <div class="ledger-card-title">${escapeHtml(d.item || '-')}</div>
-            <div class="ledger-card-meta">${escapeHtml(d.id || '')}</div>
-            <div style="margin-top:8px;"><span class="tag ${statusClass[d.status]}">${statusLabel[d.status]}</span> <span class="tag ${valueClass[d.value||'cheap']}" style="margin-left:6px;">${valueLabel[d.value||'cheap']}</span></div>
-          </div>
-        </div>
-        <div class="ledger-card-grid">
-          <div class="ledger-card-field"><div class="ledger-card-label">発見日</div><div class="ledger-card-value">${escapeHtml(d.foundDate || '-')}</div></div>
-          <div class="ledger-card-field"><div class="ledger-card-label">発見場所</div><div class="ledger-card-value">${escapeHtml(d.place || '-')}</div></div>
-          <div class="ledger-card-field"><div class="ledger-card-label">問い合わせ者</div><div class="ledger-card-value">${escapeHtml(d.contact || '-')}</div></div>
-          <div class="ledger-card-field"><div class="ledger-card-label">返却方法</div><div class="ledger-card-value">${escapeHtml(returnLabel[d.returnMethod] || '-')}</div></div>
-          <div class="ledger-card-field"><div class="ledger-card-label">保管期限</div><div class="ledger-card-value">${escapeHtml(d.deadline || '-')}</div></div>
-          <div class="ledger-card-field"><div class="ledger-card-label">詳細</div><div class="ledger-card-value">${escapeHtml(d.detail || '-')}</div></div>
-        </div>
-        <div class="ledger-card-actions">
-          <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();showDetail(${idx})">詳細を見る</button>
-          ${d.photoData ? `<button class="btn btn-sm btn-secondary" onclick="event.stopPropagation();openLightbox('${getDisplayPhotoUrl(photoSrc)}')">写真を見る</button>` : ''}
-        </div>
-      </div>`;
-    }).join('') : `<div class="empty-state"><div class="emoji">📦</div><p>該当する忘れ物はありません</p></div>`;
-  }
-}
-
-function filterLedger() {
-  const search = document.getElementById('search-input').value.toLowerCase();
-  const status = document.getElementById('filter-status').value;
-  const urgency = document.getElementById('filter-urgency').value;
-  const ret = document.getElementById('filter-return').value;
-  let filtered = ledgerData.filter(d => {
-    if (search && !d.item.toLowerCase().includes(search) && !d.id.toLowerCase().includes(search)) return false;
-    if (status && d.status !== status) return false;
-    if (urgency && d.urgency !== urgency) return false;
-    if (ret && d.returnMethod !== ret) return false;
-    return true;
-  });
-  renderLedger(filtered);
-}
-
-// ── Modal: Ledger Register ──
-const STORE_ROOM_OPTIONS = {
-  '問屋町': ['1スタ','2スタ','3スタ','4スタ','5スタ','6スタ','7スタ','8スタ','Aスタ','Bスタ','3階スタジオ','1階音楽スタジオ','ロビー','更衣室','トイレ・洗面','その他'],
-  '倉敷': ['黒スタ','白スタ','灰スタ','赤スタ','黄スタ','Aスタ','Bスタ','Cスタ','Dスタ','写真スタ','メイクルーム','ロビー','更衣室','トイレ・洗面','その他'],
-  '下中野': ['部屋不明','ロビー','更衣室','トイレ・洗面','その他'],
-  '表町': ['部屋不明','ロビー','更衣室','トイレ・洗面','その他']
-};
-
-function fillRoomOptions(roomEl, store, selectedRoom) {
-  roomEl.innerHTML = '';
-  if (!store || !STORE_ROOM_OPTIONS[store]) {
-    roomEl.innerHTML = '<option value="">先に店舗を選択してください</option>';
-    roomEl.value = '';
-    return;
-  }
-
-  const placeholder = document.createElement('option');
-  placeholder.value = '';
-  placeholder.textContent = '選択してください';
-  roomEl.appendChild(placeholder);
-
-  STORE_ROOM_OPTIONS[store].forEach(name => {
-    const opt = document.createElement('option');
-    opt.value = name;
-    opt.textContent = name;
-    roomEl.appendChild(opt);
-  });
-
-  roomEl.value = STORE_ROOM_OPTIONS[store].includes(selectedRoom || '') ? selectedRoom : '';
-}
-
-function updateFoundRoomOptions(selectedStore, selectedRoom) {
-  const storeEl = document.getElementById('m-store');
-  const roomEl = document.getElementById('m-room');
-  const store = selectedStore !== undefined ? selectedStore : storeEl.value;
-  fillRoomOptions(roomEl, store, selectedRoom !== undefined ? selectedRoom : '');
-}
-
-function updateInquiryRoomOptions(selectedStore, selectedRoom) {
-  const storeEl = document.getElementById('f-store');
-  const roomEl = document.getElementById('f-room');
-  const store = selectedStore !== undefined ? selectedStore : storeEl.value;
-  fillRoomOptions(roomEl, store, selectedRoom !== undefined ? selectedRoom : '');
-}
-
-function splitStoreRoom(value) {
-  if (!value) return { store: '', room: '' };
-  const normalized = String(value).trim();
-  if (normalized.includes(' / ')) {
-    const [store, room] = normalized.split(' / ');
-    return { store: store || '', room: room || '' };
-  }
-  const slashMatch = normalized.match(/^(問屋町|倉敷|下中野|表町)[\s\/]+(.+)$/);
-  if (slashMatch) return { store: slashMatch[1], room: slashMatch[2] };
-  for (const [store, rooms] of Object.entries(STORE_ROOM_OPTIONS)) {
-    for (const room of rooms) {
-      const patterns = [store + ' ' + room, store + room, room];
-      if (patterns.includes(normalized)) return { store, room };
-    }
-  }
-  return { store: '', room: normalized };
-}
-
-function splitFoundPlace(place) {
-  return splitStoreRoom(place);
-}
-
-function buildStoreRoom(storeId, roomId) {
-  const store = document.getElementById(storeId).value;
-  const room = document.getElementById(roomId).value;
-  if (!store) return '';
-  return room ? `${store} / ${room}` : store;
-}
-
-function buildFoundPlace() {
-  return buildStoreRoom('m-store', 'm-room');
-}
-
-function buildInquiryStudioName() {
-  return buildStoreRoom('f-store', 'f-room');
-}
-
-function addOneMonthSlash(dateObj) {
-  const d = new Date(dateObj);
-  d.setMonth(d.getMonth() + 1);
-  return d.toISOString().slice(0,10).replace(/-/g,'/');
-}
-
-function openLedgerModal(idx) {
-  editingIdx = idx !== undefined ? idx : null;
-  if (editingIdx !== null) {
-    const d = ledgerData[editingIdx];
-    document.getElementById('m-found-date').value = d.foundDate ? d.foundDate.replace(/\//g,'-') : '';
-    const parsedPlace = splitFoundPlace(d.place);
-    document.getElementById('m-store').value = parsedPlace.store;
-    updateFoundRoomOptions(parsedPlace.store, parsedPlace.room);
-    document.getElementById('m-item-name').value = d.item;
-    document.getElementById('m-item-detail').value = d.detail;
-    document.getElementById('m-contact-name').value = d.contact;
-    document.getElementById('m-return-method').value = d.returnMethod;
-    document.getElementById('m-urgency').value = d.urgency;
-    document.getElementById('m-status').value = d.status;
-    document.getElementById('m-value').value = d.value || 'cheap';
-    document.getElementById('m-public-name').value = d.publicName || '';
-    document.getElementById('m-box-no').value = d.boxNo || '';
-    toggleBoxNo();
-    // 写真読み込み
-    if (d.photoData) {
-      document.getElementById('m-photo-preview').src = d.photoData;
-      document.getElementById('m-photo-area').style.display = '';
-      document.getElementById('m-photo-area').classList.add('has-photo');
-      document.getElementById('m-photo-source-row').style.display = 'none';
-    } else {
-      document.getElementById('m-photo-preview').src = '';
-      document.getElementById('m-photo-area').style.display = 'none';
-      document.getElementById('m-photo-area').classList.remove('has-photo');
-      document.getElementById('m-photo-source-row').style.display = '';
-    }
-  } else {
-    document.getElementById('m-found-date').value = new Date().toISOString().slice(0,10);
-    document.getElementById('m-store').value = '問屋町';
-    updateFoundRoomOptions('問屋町', '1スタ');
-    document.getElementById('m-item-name').value = '';
-    document.getElementById('m-item-detail').value = '';
-    document.getElementById('m-contact-name').value = '';
-    document.getElementById('m-return-method').value = 'pending';
-    document.getElementById('m-urgency').value = 'normal';
-    document.getElementById('m-status').value = 'found';
-    document.getElementById('m-value').value = 'cheap';
-    document.getElementById('m-public-name').value = '';
-    document.getElementById('m-box-no').value = '';
-    toggleBoxNo();
-    // 写真リセット
-    document.getElementById('m-photo-preview').src = '';
-    document.getElementById('m-photo-area').style.display = 'none';
-    document.getElementById('m-photo-area').classList.remove('has-photo');
-    document.getElementById('m-photo-source-row').style.display = '';
-  }
-  document.getElementById('ledger-modal').classList.add('open');
-  updateActionVisibility(getCurrentPageName());
-}
-
-function closeModal() {
-  document.getElementById('ledger-modal').classList.remove('open');
-  updateActionVisibility(getCurrentPageName());
-}
-
-function saveLedger() {
-  const itemName = document.getElementById('m-item-name').value.trim();
-  if (!itemName) { showToast('物の内容を入力してください'); return; }
-  const place = buildFoundPlace();
-  if (!place) { showToast('店舗名と部屋名を選択してください'); return; }
-  const foundDateRaw = document.getElementById('m-found-date').value;
-  const foundDate = foundDateRaw ? foundDateRaw.replace(/-/g,'/') : '';
-  const deadline = addOneMonthSlash(new Date());
-
-  if (editingIdx !== null) {
-    ledgerData[editingIdx] = {
-      ...ledgerData[editingIdx],
-      foundDate, place,
-      item: itemName, detail: document.getElementById('m-item-detail').value,
-      contact: document.getElementById('m-contact-name').value,
-      returnMethod: document.getElementById('m-return-method').value,
-      urgency: document.getElementById('m-urgency').value,
-      status: document.getElementById('m-status').value,
-      value: document.getElementById('m-value').value,
-      publicName: document.getElementById('m-public-name').value.trim(),
-      boxNo: document.getElementById('m-box-no').value.trim(),
-      photoData: document.getElementById('m-photo-preview').src || ledgerData[editingIdx].photoData || '',
-    };
-    showToast('✅ 更新しました');
-  } else {
-    const today = new Date().toISOString().slice(0,10).replace(/-/g,'/');
-    const id = 'LF-' + today.replace(/\//g,'') + '-' + String(nextId++).padStart(3,'0');
-    ledgerData.unshift({
-      id, foundDate, inquiryDate: today,
-      place,
-      item: itemName, detail: document.getElementById('m-item-detail').value,
-      contact: document.getElementById('m-contact-name').value,
-      returnMethod: document.getElementById('m-return-method').value,
-      urgency: document.getElementById('m-urgency').value,
-      status: document.getElementById('m-status').value,
-      value: document.getElementById('m-value').value,
-      publicName: document.getElementById('m-public-name').value.trim(),
-      boxNo: document.getElementById('m-box-no').value.trim(),
-      photoData: document.getElementById('m-photo-preview').src || '',
-      deadline,
-    });
-    showToast('✅ 登録しました（管理番号: ' + id + '）');
-  }
-  closeModal();
-  renderLedger();
-  renderDashboard();
-  const sc = ledgerData.filter(d=>d.status==='searching').length;
-  document.getElementById('pending-badge').textContent = sc;
-  const bnb2 = document.getElementById('bn-badge');
-  if (bnb2) { bnb2.textContent = sc; bnb2.style.display = sc > 0 ? '' : 'none'; }
-
-  // ── GASへデータを同期 ──
-  const savedEntry = editingIdx !== null ? ledgerData[editingIdx] : ledgerData[0];
-  saveToGAS(savedEntry); // スプレッドシートに保存
-
-  // ── GASへ写真をアップロード ──
-  const photoSrc = document.getElementById('m-photo-preview').src;
-  if (photoSrc && photoSrc.startsWith('data:image')) {
-    uploadPhotoToGAS(savedEntry.id, photoSrc, 'photoData').then(driveUrl => {
-      if (driveUrl) {
-        // ドライブURLで photoData を上書き保存
-        savedEntry.photoData = driveUrl;
-        showToast('📷 写真をGoogleドライブに保存しました');
-      }
-    });
-  }
-}
-
-
-function extractDriveFileId(url) {
-  if (!url) return '';
-  const s = String(url);
-  let m = s.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if (m) return m[1];
-  m = s.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-  if (m) return m[1];
-  m = s.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if (m) return m[1];
-  return '';
-}
-
-function getDisplayPhotoUrl(url) {
-  if (!url) return '';
-  const fileId = extractDriveFileId(url);
-  if (!fileId) return url;
-  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1600`;
-}
-
-function getDisplayPhotoFallbackUrl(url) {
-  const fileId = extractDriveFileId(url);
-  if (!fileId) return url || '';
-  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
-}
-
-function getPhotoThumbUrl(url) {
-  const fileId = extractDriveFileId(url);
-  if (!fileId) return url || '';
-  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w240`;
-}
-
-function getPhotoOpenUrl(url) {
-  const fileId = extractDriveFileId(url);
-  if (!fileId) return url || '';
-  return `https://drive.google.com/file/d/${fileId}/view?usp=drivesdk`;
-}
-
-function openPhotoInNewTab(url, event) {
-  if (event) {
-    event.preventDefault();
-    event.stopPropagation();
-  }
-  const targetUrl = getPhotoOpenUrl(url || '');
-  if (!targetUrl) {
-    showToast('⚠️ 写真URLがありません');
-    return false;
-  }
-  const win = window.open(targetUrl, '_blank', 'noopener');
-  if (!win) {
-    window.location.href = targetUrl;
-  }
-  return false;
-}
-
-function renderThumbCell(url, altText) {
-  if (!url) {
-    return '<div class="ledger-thumb placeholder" aria-hidden="true">📦</div>';
-  }
-  const thumb = getPhotoThumbUrl(url);
-  const large = getDisplayPhotoUrl(url);
-  const openUrl = getPhotoOpenUrl(url);
-  return `<img class="ledger-thumb" src="${thumb}" alt="${escapeHtml(altText || '忘れ物写真')}" loading="lazy" referrerpolicy="no-referrer" onclick="event.stopPropagation();openLightbox('${large}')" onerror="this.onerror=null;this.src='${getDisplayPhotoFallbackUrl(url)}';"><button class="photo-action-btn" style="margin-top:8px;width:100%;" onclick="openPhotoInNewTab('${openUrl}', event)">開く</button>`;
-}
-
-function renderThumbOnly(url, altText, cssClass) {
-  if (!url) return '';
-  const thumb = getPhotoThumbUrl(url);
-  const large = getDisplayPhotoUrl(url);
-  return `<img class="${cssClass || 'pub-thumb'}" src="${thumb}" alt="${escapeHtml(altText || '写真')}" loading="lazy" referrerpolicy="no-referrer" onclick="openLightbox('${large}')" onerror="this.style.display='none';">`;
-}
-
-function handleDetailPhotoError(img) {
-  if (!img) return;
-  const fallback = img.dataset && img.dataset.fallback ? img.dataset.fallback : '';
-  if (fallback && !img.dataset.fallbackTried) {
-    img.dataset.fallbackTried = '1';
-    img.src = fallback;
-    return;
-  }
-  img.classList.add('is-broken');
-  const wrap = img.closest('.detail-photo-wrap');
-  if (wrap) {
-    const note = wrap.querySelector('.detail-photo-note');
-    if (note) note.style.display = 'block';
-  }
-}
-
-// ── Detail Modal ──
-function showDetail(idx) {
-  const d = ledgerData[idx];
-  editingIdx = idx;
-  document.getElementById('detail-title').textContent = d.id + ' 詳細';
-  document.getElementById('detail-body').innerHTML = `
-    <div class="detail-grid">
-      <div class="detail-item"><div class="dl">ステータス</div><div class="dd"><span class="tag ${statusClass[d.status]}">${statusLabel[d.status]}</span></div></div>
-      <div class="detail-item"><div class="dl">緊急性</div><div class="dd"><span class="urgency-badge ${d.urgency==='high'?'urgency-high':'urgency-normal'}">${urgencyLabel[d.urgency]}</span></div></div>
-      <div class="detail-item"><div class="dl">受付日</div><div class="dd">${d.inquiryDate}</div></div>
-      <div class="detail-item"><div class="dl">発見日</div><div class="dd">${d.foundDate||'未発見'}</div></div>
-      <div class="detail-item full"><div class="dl">物の内容</div><div class="dd">${d.item}</div></div>
-      <div class="detail-item full"><div class="dl">特徴・詳細</div><div class="dd">${d.detail||'-'}</div></div>
-      <div class="detail-item"><div class="dl">発見場所</div><div class="dd">${d.place||'-'}</div></div>
-      <div class="detail-item"><div class="dl">返却方法</div><div class="dd">${returnLabel[d.returnMethod]}</div></div>
-      <div class="detail-item"><div class="dl">問い合わせ者</div><div class="dd">${d.contact||'-'}</div></div>
-      <div class="detail-item"><div class="dl">保管期限</div><div class="dd" style="font-family:'DM Mono',monospace;">${d.deadline}</div></div>
-      <div class="detail-item"><div class="dl">価値区分</div><div class="dd"><span class="tag ${valueClass[d.value||'cheap']}">${valueLabel[d.value||'cheap']}</span></div></div>
-      <div class="detail-item"><div class="dl">公開表示名</div><div class="dd">${d.publicName||'-'}</div></div>
-      <div class="detail-item"><div class="dl">ボックス番号</div><div class="dd">${d.boxNo||'-'}</div></div>
-      ${d.photoData ? `<div class="detail-item full"><div class="dl">写真</div><div class="dd detail-photo-wrap"><img class="detail-photo" src="${getDisplayPhotoUrl(d.photoData)}" data-fallback="${getDisplayPhotoFallbackUrl(d.photoData)}" alt="忘れ物写真" onclick="openLightbox('${getDisplayPhotoUrl(photoSrc)}')" onerror="handleDetailPhotoError(this)"><div class="detail-photo-note">プレビューできない場合は、下のボタンから写真を開いてください。</div><div class="detail-photo-actions"><button class="photo-action-btn" onclick="openLightbox('${getDisplayPhotoUrl(photoSrc)}');event.stopPropagation();">拡大表示</button><button class="photo-action-btn" onclick="openPhotoInNewTab('${getPhotoOpenUrl(photoSrc)}', event)">別タブで開く</button></div></div></div>` : ''}
+<header class="hero">
+  <div class="container">
+    <div class="hero-top">
+      <div>
+        <h1>忘れ物お問い合わせ</h1>
+        <p>公開一覧の確認と、お問い合わせ送信ができます。スタッフ用の管理機能は表示されません。</p>
+      </div>
+      <a class="staff-link" href="./staff.html">スタッフ用画面はこちら</a>
     </div>
-  `;
-  const deleteBtn = document.getElementById('detail-delete-btn');
-  if (deleteBtn) deleteBtn.style.display = d.status === 'returned' ? '' : 'none';
-  document.getElementById('detail-modal').classList.add('open');
-  updateActionVisibility(getCurrentPageName());
-}
+  </div>
+</header>
 
-function closeDetailModal() { document.getElementById('detail-modal').classList.remove('open'); const btn=document.getElementById('detail-delete-btn'); if (btn) btn.style.display='none'; updateActionVisibility(getCurrentPageName()); }
+<main class="main">
+  <div class="container">
+    <div class="grid">
+      <section class="card" id="public-section">
+        <div class="card-header">
+          <h2>公開一覧</h2>
+          <div class="small muted" id="last-sync">読み込み前</div>
+        </div>
+        <div class="card-body">
+          <div class="notice info" style="margin-bottom:12px;">
+            公開一覧には、返却済み・処分済み以外の忘れ物が表示されます。安価な物はボックス番号まで、高価な物は問い合わせ案内を表示します。
+          </div>
 
-function updateStatus() {
-  closeDetailModal();
-  openLedgerModal(editingIdx);
-}
+          <div class="pub-toolbar">
+            <div class="store-tabs" id="store-tabs"></div>
+            <select class="store-select" id="store-select"></select>
+            <div class="toolbar-row">
+              <input id="search-input" class="search" type="search" placeholder="品名・公開名・特徴で検索">
+              <select id="value-filter" class="filter">
+                <option value="all">すべて表示</option>
+                <option value="cheap">安価な物のみ</option>
+                <option value="valuable">高価な物のみ</option>
+              </select>
+              <button class="btn btn-secondary" type="button" id="reload-btn">再読み込み</button>
+            </div>
+          </div>
 
-async function deleteCurrentItem() {
-  if (editingIdx === null || editingIdx === undefined) return;
-  const target = ledgerData[editingIdx];
-  if (!target || target.status !== 'returned') {
-    showToast('返却済みの物のみ削除できます');
-    return;
+          <div class="count-bar">
+            <div id="result-count">0件</div>
+            <div class="loading" id="public-loading">読み込み中…</div>
+          </div>
+
+          <div class="pub-list" id="pub-list"></div>
+        </div>
+      </section>
+
+      <section class="card" id="form-section">
+        <div class="card-header">
+          <h2>お問い合わせフォーム</h2>
+          <div class="small muted">送信内容はスタッフ側の台帳に登録されます</div>
+        </div>
+        <div class="card-body">
+          <div class="notice warn" style="margin-bottom:12px;">
+            お問い合わせ後、スタッフが順次確認します。すぐに見つからない場合がありますのでご了承ください。
+          </div>
+
+          <form id="inquiry-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="store-name">店舗名<span class="req">*</span></label>
+                <select id="store-name" required></select>
+              </div>
+              <div class="form-group">
+                <label for="room-name">部屋名<span class="req">*</span></label>
+                <select id="room-name" required></select>
+              </div>
+
+              <div class="form-group">
+                <label for="use-date">利用日<span class="req">*</span></label>
+                <input id="use-date" type="date" required>
+              </div>
+              <div class="form-group">
+                <label>利用時間<span class="req">*</span></label>
+                <div class="time-row">
+                  <select id="start-time" required></select>
+                  <div class="time-sep">〜</div>
+                  <select id="end-time" required></select>
+                </div>
+              </div>
+
+              <div class="form-group full">
+                <label for="reserver-name">予約名<span class="req">*</span></label>
+                <input id="reserver-name" type="text" maxlength="80" placeholder="例：山田 太郎" required>
+              </div>
+
+              <div class="form-group full">
+                <label for="item-name">忘れ物の内容<span class="req">*</span></label>
+                <input id="item-name" type="text" maxlength="120" placeholder="例：黒い折りたたみ傘" required>
+              </div>
+
+              <div class="form-group full">
+                <label for="item-detail">色・ブランド・特徴・中身など</label>
+                <textarea id="item-detail" maxlength="600" placeholder="例：取っ手にキーホルダー付き、白いロゴあり など"></textarea>
+              </div>
+
+              <div class="form-group full">
+                <label for="inquiry-location">置いた可能性が高い場所</label>
+                <input id="inquiry-location" type="text" maxlength="120" placeholder="例：鏡前、ロビー、更衣室の棚の上 など">
+              </div>
+
+              <div class="form-group full">
+                <label>写真（任意）</label>
+                <div class="photo-box">
+                  <div class="small muted" style="margin-bottom:8px;">お手元に同じ物の写真があれば添付してください。</div>
+                  <div class="photo-actions">
+                    <label class="btn btn-secondary" for="photo-camera">カメラで撮影</label>
+                    <label class="btn btn-secondary" for="photo-file">写真を選ぶ</label>
+                    <button class="btn btn-secondary" type="button" id="photo-clear">写真を削除</button>
+                  </div>
+                  <input id="photo-camera" type="file" accept="image/*" capture="environment" style="display:none;">
+                  <input id="photo-file" type="file" accept="image/*" style="display:none;">
+                  <div class="photo-preview" id="photo-preview"><img id="photo-preview-img" alt="写真プレビュー"></div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="contact-tel">電話番号<span class="req">*</span></label>
+                <input id="contact-tel" type="tel" inputmode="tel" maxlength="30" placeholder="例：09012345678" required>
+              </div>
+              <div class="form-group">
+                <label for="contact-email">メールアドレス</label>
+                <input id="contact-email" type="email" maxlength="120" placeholder="例：sample@example.com">
+              </div>
+
+              <div class="form-group full">
+                <label for="urgency">緊急性</label>
+                <select id="urgency">
+                  <option value="normal">通常</option>
+                  <option value="high">高め（当日中に確認したい）</option>
+                </select>
+              </div>
+
+              <div class="form-group full">
+                <label>確認事項<span class="req">*</span></label>
+                <div class="checks">
+                  <label class="check"><input type="checkbox" id="terms1" required><span>入力内容に間違いがないことを確認しました。</span></label>
+                  <label class="check"><input type="checkbox" id="terms2" required><span>見つからない場合があることを理解しました。</span></label>
+                  <label class="check"><input type="checkbox" id="terms3" required><span>返却には本人確認や内容確認を行う場合があることを理解しました。</span></label>
+                  <label class="check"><input type="checkbox" id="terms4" required><span>保管期限は1か月であることを理解しました。</span></label>
+                  <label class="check"><input type="checkbox" id="terms5" required><span>送信内容がスタッフ台帳に登録されることを理解しました。</span></label>
+                </div>
+              </div>
+            </div>
+
+            <div class="sticky-actions">
+              <button class="btn btn-primary btn-block" id="submit-btn" type="submit">この内容で問い合わせする</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+(() => {
+  const GAS_ENDPOINT = (window.APP_CONFIG && window.APP_CONFIG.GAS_ENDPOINT ? String(window.APP_CONFIG.GAS_ENDPOINT) : '').trim();
+  const STORE_OPTIONS = {
+    '問屋町': ['1スタ','2スタ','3スタ','4スタ','5スタ','6スタ','7スタ','8スタ','Aスタ','Bスタ','3階スタジオ','1階音楽スタジオ'],
+    '倉敷': ['黒スタ','白スタ','灰スタ','赤スタ','黄スタ','Aスタ','Bスタ','Cスタ','Dスタ','写真スタ','メイクルーム'],
+    '下中野': ['部屋不明','ロビー','更衣室','トイレ・洗面','その他'],
+    '表町': ['部屋不明','ロビー','更衣室','トイレ・洗面','その他']
+  };
+  const STORES = ['すべて', ...Object.keys(STORE_OPTIONS)];
+  const state = { items: [], storeFilter: 'すべて', valueFilter: 'all', keyword: '', selectedFile: null, selectedPhotoData: '' };
+
+  const els = {
+    storeTabs: document.getElementById('store-tabs'),
+    storeSelect: document.getElementById('store-select'),
+    searchInput: document.getElementById('search-input'),
+    valueFilter: document.getElementById('value-filter'),
+    pubList: document.getElementById('pub-list'),
+    resultCount: document.getElementById('result-count'),
+    publicLoading: document.getElementById('public-loading'),
+    lastSync: document.getElementById('last-sync'),
+    reloadBtn: document.getElementById('reload-btn'),
+    form: document.getElementById('inquiry-form'),
+    storeName: document.getElementById('store-name'),
+    roomName: document.getElementById('room-name'),
+    useDate: document.getElementById('use-date'),
+    startTime: document.getElementById('start-time'),
+    endTime: document.getElementById('end-time'),
+    reserverName: document.getElementById('reserver-name'),
+    itemName: document.getElementById('item-name'),
+    itemDetail: document.getElementById('item-detail'),
+    inquiryLocation: document.getElementById('inquiry-location'),
+    contactTel: document.getElementById('contact-tel'),
+    contactEmail: document.getElementById('contact-email'),
+    urgency: document.getElementById('urgency'),
+    photoCamera: document.getElementById('photo-camera'),
+    photoFile: document.getElementById('photo-file'),
+    photoClear: document.getElementById('photo-clear'),
+    photoPreview: document.getElementById('photo-preview'),
+    photoPreviewImg: document.getElementById('photo-preview-img'),
+    submitBtn: document.getElementById('submit-btn'),
+    toastWrap: document.getElementById('toast-wrap')
+  };
+
+  function showToast(message) {
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.textContent = message;
+    els.toastWrap.appendChild(el);
+    setTimeout(() => el.remove(), 3200);
   }
-  const ok = confirm(`返却済みデータ ${target.id} を削除します。よろしいですか？`);
-  if (!ok) return;
 
-  const targetId = target.id;
-  ledgerData.splice(editingIdx, 1);
-  editingIdx = null;
-  closeDetailModal();
-  renderDashboard();
-  renderLedger();
-  renderPublicPage();
-  const sc = ledgerData.filter(d=>d.status==='searching').length;
-  document.getElementById('pending-badge').textContent = sc;
-  const bnb = document.getElementById('bn-badge');
-  if (bnb) { bnb.textContent = sc; bnb.style.display = sc > 0 ? '' : 'none'; }
+  function isoDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2,'0');
+    const d = String(date.getDate()).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  }
 
-  if (hasGasEndpoint()) {
-    const result = await deleteFromGAS(targetId);
-    if (result && result.success) {
-      showToast('🗑️ 削除しました');
-    } else {
-      showToast('⚠️ 画面上では削除しましたが、GAS側の削除に失敗しました');
+  function addOneMonth(dateText) {
+    if (!dateText) return '';
+    const d = new Date(dateText + 'T00:00:00');
+    if (Number.isNaN(d.getTime())) return '';
+    d.setMonth(d.getMonth() + 1);
+    return isoDate(d);
+  }
+
+  function generateTimes() {
+    const times = [];
+    for (let h = 0; h < 24; h++) {
+      for (let m = 0; m < 60; m += 30) {
+        times.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+      }
     }
-  } else {
-    showToast('🗑️ 削除しました');
+    return times;
   }
-}
 
-// ── Form ──
-function triggerInquiryPhotoInput(source) {
-  if (source === 'camera') {
-    document.getElementById('f-photo-input-camera').click();
-  } else {
-    document.getElementById('f-photo-input-gallery').click();
-  }
-}
-
-function handleInquiryPhoto(input) {
-  if (!input.files || !input.files[0]) return;
-  const file = input.files[0];
-  const reader = new FileReader();
-  reader.onload = e => {
-    const data = e.target.result;
-    const preview = document.getElementById('f-photo-preview-img');
-    const area = document.getElementById('f-photo-area');
-    const srcRow = document.getElementById('f-photo-source-row');
-
-    preview.src = data;
-    area.style.display = '';
-    area.classList.add('has-photo');
-    srcRow.style.display = 'none';
-
-    compressImage(data, 1400, 0.82, compressed => {
-      preview.src = compressed;
+  function fillTimeSelects() {
+    const times = generateTimes();
+    [els.startTime, els.endTime].forEach(sel => {
+      sel.innerHTML = '<option value="">選択してください</option>' + times.map(t => `<option value="${t}">${t}</option>`).join('');
     });
-  };
-  reader.readAsDataURL(file);
-  input.value = '';
-}
-
-
-function buildTimeOptions(include2400 = false) {
-  const out = [];
-  for (let total = 0; total <= 24 * 60; total += 30) {
-    if (!include2400 && total === 24 * 60) continue;
-    const h = String(Math.floor(total / 60)).padStart(2, '0');
-    const m = String(total % 60).padStart(2, '0');
-    out.push(`${h}:${m}`);
-  }
-  return out;
-}
-
-function initUseTimeDropdowns() {
-  const startEl = document.getElementById('f-time-start');
-  const endEl = document.getElementById('f-time-end');
-  if (!startEl || !endEl) return;
-
-  const startOptions = buildTimeOptions(false);
-  const endOptions = buildTimeOptions(true);
-
-  startEl.innerHTML = '<option value="">開始時間を選択</option>' + startOptions.map(v => `<option value="${v}">${v}</option>`).join('');
-  endEl.innerHTML = '<option value="">終了時間を選択</option>' + endOptions.map(v => `<option value="${v}">${v}</option>`).join('');
-  syncUseTime();
-}
-
-function syncUseTime() {
-  const startEl = document.getElementById('f-time-start');
-  const endEl = document.getElementById('f-time-end');
-  const hiddenEl = document.getElementById('f-time');
-  if (!hiddenEl || !startEl || !endEl) return;
-
-  const start = (startEl.value || '').trim();
-  const end = (endEl.value || '').trim();
-
-  if (!start || !end) {
-    hiddenEl.value = '';
-    return;
   }
 
-  const toMinutes = (hhmm) => {
-    const [h, m] = hhmm.split(':').map(Number);
-    return h * 60 + m;
-  };
-
-  if (toMinutes(end) <= toMinutes(start)) {
-    hiddenEl.value = '';
-    return;
+  function fillStoreRoomSelects() {
+    els.storeName.innerHTML = Object.keys(STORE_OPTIONS).map(store => `<option value="${store}">${store}</option>`).join('');
+    fillRoomOptions(els.storeName.value || Object.keys(STORE_OPTIONS)[0]);
+    els.storeName.addEventListener('change', () => fillRoomOptions(els.storeName.value));
   }
 
-  hiddenEl.value = `${start}〜${end}`;
-}
+  function fillRoomOptions(store) {
+    const rooms = STORE_OPTIONS[store] || ['部屋不明'];
+    els.roomName.innerHTML = rooms.map(room => `<option value="${room}">${room}</option>`).join('');
+  }
 
-function removeInquiryPhoto() {
-  document.getElementById('f-photo-preview-img').src = '';
-  document.getElementById('f-photo-area').style.display = 'none';
-  document.getElementById('f-photo-area').classList.remove('has-photo');
-  document.getElementById('f-photo-source-row').style.display = '';
-  ['f-photo-input-camera','f-photo-input-gallery'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-}
+  function buildStoreFilters() {
+    els.storeTabs.innerHTML = STORES.map(store => `<button type="button" class="store-tab${store === state.storeFilter ? ' active' : ''}" data-store="${store}">${store}</button>`).join('');
+    els.storeSelect.innerHTML = STORES.map(store => `<option value="${store}">${store}</option>`).join('');
+    els.storeSelect.value = state.storeFilter;
 
-function resetForm() {
-  ['f-date','f-time','f-time-start','f-time-end','f-name','f-store','f-room','f-item','f-detail','f-location','f-tel','f-email','f-urgency'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-  ['c1','c2','c3','c4','c5'].forEach(id => document.getElementById(id).checked = false);
-  removeInquiryPhoto();
-  initUseTimeDropdowns();
-  updateInquiryRoomOptions('', '');
-  document.getElementById('autoReplyPanel').style.display = 'none';
-}
+    els.storeTabs.querySelectorAll('.store-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.storeFilter = btn.dataset.store;
+        buildStoreFilters();
+        renderPublicList();
+      });
+    });
+    els.storeSelect.onchange = () => {
+      state.storeFilter = els.storeSelect.value;
+      buildStoreFilters();
+      renderPublicList();
+    };
+  }
 
-async function submitForm() {
-  syncUseTime();
-  const required = [
-    { id:'f-date', label:'利用日' }, { id:'f-time', label:'利用時間' }, { id:'f-name', label:'予約名' },
-    { id:'f-store', label:'店舗名' }, { id:'f-room', label:'部屋名' }, { id:'f-item', label:'忘れ物の内容' },
-    { id:'f-tel', label:'電話番号' },
-  ];
-  for (const r of required) {
-    if (!document.getElementById(r.id).value.trim()) {
-      showToast('⚠️ ' + r.label + 'を入力してください');
+  function extractDriveFileId(url) {
+    const text = String(url || '');
+    const m = text.match(/\/d\/([a-zA-Z0-9_-]+)/) || text.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    return m ? m[1] : '';
+  }
+
+  function toImageUrl(url) {
+    const id = extractDriveFileId(url);
+    return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w1000` : String(url || '');
+  }
+
+  function toOpenUrl(url) {
+    const id = extractDriveFileId(url);
+    return id ? `https://drive.google.com/file/d/${id}/view?usp=sharing` : String(url || '#');
+  }
+
+  function inferStore(item) {
+    const source = [item.place, item.studioName, item.inquiryLocation].filter(Boolean).join(' / ');
+    const stores = Object.keys(STORE_OPTIONS);
+    return stores.find(store => source.includes(store)) || 'その他';
+  }
+
+  function isPublic(item) {
+    const status = String(item.status || '').toLowerCase();
+    return status !== 'returned' && status !== 'disposed';
+  }
+
+  function getPublicItems() {
+    const keyword = state.keyword.trim().toLowerCase();
+    return state.items.filter(isPublic).filter(item => {
+      const store = inferStore(item);
+      if (state.storeFilter !== 'すべて' && store !== state.storeFilter) return false;
+      if (state.valueFilter !== 'all' && String(item.value || 'cheap') !== state.valueFilter) return false;
+      if (!keyword) return true;
+      const hay = [item.publicName, item.item, item.detail, item.place, item.studioName, item.boxNo].join(' ').toLowerCase();
+      return hay.includes(keyword);
+    });
+  }
+
+  function publicCard(item) {
+    const value = String(item.value || 'cheap');
+    const store = inferStore(item);
+    const title = item.publicName || item.item || '忘れ物';
+    const photoUrl = item.photoData || item.inquiryPhotoUrl || '';
+    const thumb = photoUrl ? `<img src="${toImageUrl(photoUrl)}" alt="${escapeHtml(title)}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\'thumb-fallback\'>📷</div>'">` : `<div class="thumb-fallback">📦</div>`;
+    const detail = value === 'cheap'
+      ? escapeHtml(item.detail || '特徴の登録はありません。')
+      : '高価な忘れ物のため、詳細は公開していません。心当たりがある場合はフォームよりお問い合わせください。';
+    const pickup = value === 'cheap'
+      ? `<div class="pickup-box">${item.boxNo ? `保管ボックス：${escapeHtml(item.boxNo)}` : '保管場所の詳細はスタッフへご確認ください。'}</div>`
+      : `<div class="valuable-box">高価な忘れ物は、内容確認後に返却します。お問い合わせフォームへご入力ください。</div>`;
+    return `
+      <article class="pub-card">
+        <div class="thumb-wrap">${thumb}</div>
+        <div>
+          <div class="pub-title">${escapeHtml(title)}</div>
+          <div class="pub-meta">拠点：${escapeHtml(store)} ／ 発見日：${escapeHtml(item.foundDate || '未登録')} ／ 発見場所：${escapeHtml(item.place || '未登録')}</div>
+          <div class="pub-tags"><span class="tag ${value === 'valuable' ? 'tag-valuable' : 'tag-cheap'}">${value === 'valuable' ? '高価な物' : '安価な物'}</span></div>
+          <div class="pub-detail">${detail}</div>
+          ${pickup}
+          ${photoUrl ? `<div class="small" style="margin-top:8px;"><a href="${toOpenUrl(photoUrl)}" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-weight:700;">写真を別タブで開く</a></div>` : ''}
+        </div>
+      </article>`;
+  }
+
+  function renderPublicList() {
+    const items = getPublicItems();
+    els.resultCount.textContent = `${items.length}件`;
+    if (!items.length) {
+      els.pubList.innerHTML = '<div class="empty">表示できる忘れ物はありません。</div>';
       return;
     }
+    els.pubList.innerHTML = items.map(publicCard).join('');
   }
-  const allChecked = ['c1','c2','c3','c4','c5'].every(id => document.getElementById(id).checked);
-  if (!allChecked) { showToast('⚠️ すべての規約にチェックを入れてください'); return; }
 
-  const today = new Date().toISOString().slice(0,10).replace(/-/g,'/');
-  const id = 'LF-' + today.replace(/\//g,'') + '-' + String(nextId++).padStart(3,'0');
-  const deadline = addOneMonthSlash(new Date());
-  const photoImg = document.getElementById('f-photo-preview-img');
-  const inquiryPhotoData = photoImg ? photoImg.src : '';
-  let inquiryPhotoUrl = '';
-
-  const entry = {
-    id,
-    rowCreatedAt: new Date().toISOString(),
-    rowUpdatedAt: new Date().toISOString(),
-    inquiryDate: today,
-    useDate: document.getElementById('f-date').value ? document.getElementById('f-date').value.replace(/-/g,'/') : '',
-    useTime: document.getElementById('f-time').value.trim(),
-    reserverName: document.getElementById('f-name').value.trim(),
-    studioName: buildInquiryStudioName(),
-    foundDate: '',
-    place: '',
-    item: document.getElementById('f-item').value.trim(),
-    detail: document.getElementById('f-detail').value.trim(),
-    inquiryLocation: document.getElementById('f-location').value.trim(),
-    inquiryPhotoUrl,
-    contact: document.getElementById('f-name').value.trim(),
-    contactTel: document.getElementById('f-tel').value.trim(),
-    contactEmail: document.getElementById('f-email').value.trim(),
-    returnMethod: 'pending',
-    urgency: document.getElementById('f-urgency').value,
-    status: 'searching',
-    deadline,
-    value: 'cheap',
-    publicName: '',
-    boxNo: '',
-    photoData: '',
-    terms1: document.getElementById('c1').checked ? 'TRUE' : 'FALSE',
-    terms2: document.getElementById('c2').checked ? 'TRUE' : 'FALSE',
-    terms3: document.getElementById('c3').checked ? 'TRUE' : 'FALSE',
-    terms4: document.getElementById('c4').checked ? 'TRUE' : 'FALSE',
-    terms5: document.getElementById('c5').checked ? 'TRUE' : 'FALSE'
-  };
-
-  ledgerData.unshift(entry);
-
-  const sc2 = ledgerData.filter(d => d.status === 'searching').length;
-  document.getElementById('pending-badge').textContent = sc2;
-  const bnb3 = document.getElementById('bn-badge');
-  if (bnb3) { bnb3.textContent = sc2; bnb3.style.display = sc2 > 0 ? '' : 'none'; }
-
-  if (hasGasEndpoint()) {
-    await saveToGAS(entry);
-
-    if (inquiryPhotoData && inquiryPhotoData.startsWith('data:image')) {
-      inquiryPhotoUrl = await uploadPhotoToGAS(id, inquiryPhotoData, 'inquiryPhotoUrl') || '';
-      if (inquiryPhotoUrl) {
-        entry.inquiryPhotoUrl = inquiryPhotoUrl;
-      } else {
-        showToast('⚠️ 写真の保存に失敗したため、問い合わせ内容のみ登録しました');
-      }
+  async function loadPublicItems() {
+    if (!GAS_ENDPOINT) {
+      els.publicLoading.textContent = 'config.js のGAS設定が必要です';
+      showToast('config.js の GAS_ENDPOINT を確認してください');
+      return;
     }
-  } else if (inquiryPhotoData && inquiryPhotoData.startsWith('data:image')) {
-    showToast('⚠️ GAS URL未設定のため、写真は端末内プレビューのみです');
-  }
-
-  renderDashboard();
-  renderLedger();
-  document.getElementById('autoReplyPanel').style.display = 'block';
-  document.getElementById('autoReplyPanel').scrollIntoView({ behavior:'smooth' });
-  showToast('✅ 問い合わせを受け付けました（' + id + '）');
-}
-
-function goToLedger() { resetForm(); showPage('ledger'); }
-
-// ── SOP ──
-function renderSOP() {
-  const list = document.getElementById('sop-list');
-  list.innerHTML = SOP_ITEMS.map((item, i) => `
-    <div class="sop-item ${sopChecked[i]?'done':''}" onclick="toggleSOP(${i})">
-      <div class="sop-num sop-check">${sopChecked[i]?'':i+1}</div>
-      <div>
-        <div class="sop-text" style="${sopChecked[i]?'text-decoration:line-through;color:var(--text-muted);':''}">${item.text}</div>
-        <div class="sop-note">${item.note}</div>
-      </div>
-    </div>
-  `).join('');
-  const done = sopChecked.filter(Boolean).length;
-  const total = SOP_ITEMS.length;
-  document.getElementById('sop-progress-text').textContent = done + ' / ' + total + ' 完了';
-  document.getElementById('sop-progress-bar').style.width = (done/total*100) + '%';
-}
-
-function toggleSOP(i) { sopChecked[i] = !sopChecked[i]; renderSOP(); }
-function resetSOP() { sopChecked.fill(false); renderSOP(); }
-
-// ── GAS Tabs ──
-function switchGasTab(n) {
-  document.querySelectorAll('.gas-tab').forEach((el,i) => el.style.display = i===n?'block':'none');
-  document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', i===n));
-}
-
-const gasCodes = [
-  document.querySelector ? null : null, // filled at copy time
-];
-
-function copyCode(n) {
-  const el = document.querySelectorAll('.gas-tab pre')[n];
-  if (!el) return;
-  navigator.clipboard.writeText(el.textContent).then(() => showToast('📋 コードをコピーしました'));
-}
-
-// ── Toast ──
-function showToast(msg) {
-  const container = document.getElementById('toast-container');
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.textContent = msg;
-  container.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
-}
-
-
-
-// ── Modal Photo ──
-function triggerPhotoInput(source) {
-  if (source === 'camera') {
-    document.getElementById('m-photo-input-camera').click();
-  } else {
-    document.getElementById('m-photo-input-gallery').click();
-  }
-}
-
-function handleModalPhoto(input) {
-  if (!input.files || !input.files[0]) return;
-  const file = input.files[0];
-  const reader = new FileReader();
-  reader.onload = e => {
-    const data = e.target.result;
-    const preview = document.getElementById('m-photo-preview');
-    const area    = document.getElementById('m-photo-area');
-    const srcRow  = document.getElementById('m-photo-source-row');
-    preview.src = data;
-    area.style.display = '';
-    area.classList.add('has-photo');
-    srcRow.style.display = 'none';
-
-    // 圧縮（長辺1200px以内にリサイズ）
-    compressImage(data, 1200, 0.82, compressed => {
-      preview.src = compressed;
-    });
-  };
-  reader.readAsDataURL(file);
-  // reset input so same file can be re-selected
-  input.value = '';
-}
-
-function removeModalPhoto() {
-  document.getElementById('m-photo-preview').src = '';
-  document.getElementById('m-photo-area').style.display = 'none';
-  document.getElementById('m-photo-area').classList.remove('has-photo');
-  document.getElementById('m-photo-source-row').style.display = '';
-}
-
-// 画像圧縮（Canvas経由）
-function compressImage(dataUrl, maxSize, quality, callback) {
-  const img = new Image();
-  img.onload = () => {
-    let w = img.width, h = img.height;
-    if (w > maxSize || h > maxSize) {
-      if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
-      else       { w = Math.round(w * maxSize / h); h = maxSize; }
+    els.publicLoading.textContent = '読み込み中…';
+    try {
+      const url = `${GAS_ENDPOINT}${GAS_ENDPOINT.includes('?') ? '&' : '?'}action=getAll&_=${Date.now()}`;
+      const res = await fetch(url, { method: 'GET' });
+      const text = await res.text();
+      const data = JSON.parse(text);
+      if (!data.success) throw new Error(data.error || '読み込みに失敗しました');
+      state.items = Array.isArray(data.items) ? data.items : [];
+      els.lastSync.textContent = '最終更新: ' + new Date().toLocaleString('ja-JP');
+      renderPublicList();
+      els.publicLoading.textContent = '';
+    } catch (err) {
+      console.error(err);
+      els.publicLoading.textContent = '読み込み失敗';
+      els.pubList.innerHTML = '<div class="empty">公開一覧の読み込みに失敗しました。時間をおいて再度お試しください。</div>';
+      showToast('公開一覧の読み込みに失敗しました');
     }
+  }
+
+  function escapeHtml(text) {
+    return String(text ?? '').replace(/[&<>'"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[s]));
+  }
+
+  function setPreview(dataUrl) {
+    state.selectedPhotoData = dataUrl || '';
+    if (dataUrl) {
+      els.photoPreviewImg.src = dataUrl;
+      els.photoPreview.style.display = 'block';
+    } else {
+      els.photoPreviewImg.removeAttribute('src');
+      els.photoPreview.style.display = 'none';
+    }
+  }
+
+  async function fileToCompressedDataUrl(file) {
+    const bitmap = await createImageBitmap(file);
+    const maxEdge = 1600;
+    let { width, height } = bitmap;
+    const scale = Math.min(1, maxEdge / Math.max(width, height));
+    width = Math.max(1, Math.round(width * scale));
+    height = Math.max(1, Math.round(height * scale));
     const canvas = document.createElement('canvas');
-    canvas.width = w; canvas.height = h;
-    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-    callback(canvas.toDataURL('image/jpeg', quality));
-  };
-  img.src = dataUrl;
-}
+    canvas.width = width; canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(bitmap, 0, 0, width, height);
+    return canvas.toDataURL('image/jpeg', 0.82);
+  }
 
-// ライトボックス（写真拡大表示）
-function openLightbox(src) {
-  if (!src) return;
-  const lb = document.createElement('div');
-  lb.className = 'photo-lightbox';
-  lb.innerHTML = `<img src="${src}" alt="写真">`;
-  lb.onclick = () => lb.remove();
-  document.body.appendChild(lb);
-}
+  async function handlePhotoFile(file) {
+    if (!file) return;
+    try {
+      const dataUrl = await fileToCompressedDataUrl(file);
+      state.selectedFile = file;
+      setPreview(dataUrl);
+    } catch (err) {
+      console.error(err);
+      showToast('写真の読み込みに失敗しました');
+    }
+  }
 
+  function buildInquiryItem(id) {
+    const store = els.storeName.value;
+    const room = els.roomName.value;
+    const useDate = els.useDate.value;
+    const deadline = addOneMonth(useDate || isoDate(new Date()));
+    return {
+      id,
+      inquiryDate: isoDate(new Date()),
+      useDate,
+      useTime: `${els.startTime.value}〜${els.endTime.value}`,
+      reserverName: els.reserverName.value.trim(),
+      studioName: `${store} / ${room}`,
+      item: els.itemName.value.trim(),
+      detail: els.itemDetail.value.trim(),
+      inquiryLocation: els.inquiryLocation.value.trim(),
+      inquiryPhotoUrl: '',
+      foundDate: '',
+      place: '',
+      contact: '',
+      contactTel: els.contactTel.value.trim(),
+      contactEmail: els.contactEmail.value.trim(),
+      returnMethod: 'pending',
+      urgency: els.urgency.value,
+      status: 'searching',
+      deadline,
+      value: 'valuable',
+      publicName: '',
+      boxNo: '',
+      photoData: '',
+      terms1: document.getElementById('terms1').checked ? 'checked' : '',
+      terms2: document.getElementById('terms2').checked ? 'checked' : '',
+      terms3: document.getElementById('terms3').checked ? 'checked' : '',
+      terms4: document.getElementById('terms4').checked ? 'checked' : '',
+      terms5: document.getElementById('terms5').checked ? 'checked' : ''
+    };
+  }
 
-// ══════════════════════════════════════════
-// GAS同期機能
-// ══════════════════════════════════════════
-
-// GASへのリクエスト共通関数
-async function gasRequest(payload) {
-  if (!ensureGasEndpointFromInput()) return null;
-  try {
+  async function postJson(payload) {
     const res = await fetch(GAS_ENDPOINT, {
       method: 'POST',
-      mode: 'cors',
-      headers: { 'Content-Type': 'text/plain' },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload)
     });
     const text = await res.text();
     return JSON.parse(text);
-  } catch(e) {
-    console.error('GAS通信エラー:', e);
-    return null;
   }
-}
 
-// 1件をスプレッドシートに保存
-async function saveToGAS(item) {
-  if (!hasGasEndpoint()) return;
+  async function submitInquiry(ev) {
+    ev.preventDefault();
+    if (!GAS_ENDPOINT) {
+      showToast('config.js の GAS_ENDPOINT を設定してください');
+      return;
+    }
+    if (!els.startTime.value || !els.endTime.value) {
+      showToast('利用時間を選択してください');
+      return;
+    }
+    if (els.startTime.value >= els.endTime.value) {
+      showToast('利用時間の終了は開始より後を選んでください');
+      return;
+    }
+    if (!els.form.reportValidity()) return;
 
-  const payloadItem = { ...item };
-  if (payloadItem.photoData && /^data:image/i.test(payloadItem.photoData)) {
-    payloadItem.photoData = '';
-  }
-  if (payloadItem.inquiryPhotoUrl && /^data:image/i.test(payloadItem.inquiryPhotoUrl)) {
-    payloadItem.inquiryPhotoUrl = '';
-  }
-  payloadItem.rowUpdatedAt = new Date().toISOString();
-  if (!payloadItem.rowCreatedAt) payloadItem.rowCreatedAt = payloadItem.rowUpdatedAt;
+    const id = 'I' + Date.now();
+    const item = buildInquiryItem(id);
+    els.submitBtn.disabled = true;
+    els.submitBtn.textContent = '送信中…';
+    try {
+      const saveResult = await postJson({ action: 'saveItem', item });
+      if (!saveResult.success) throw new Error(saveResult.error || '保存に失敗しました');
 
-  const result = await gasRequest({ action: 'saveItem', item: payloadItem });
-  if (result && result.success) {
-    console.log('スプレッドシートに保存:', result.action, payloadItem.id);
-  } else {
-    console.warn('スプレッドシート保存失敗:', result);
-  }
-}
+      if (state.selectedPhotoData) {
+        const photoResult = await postJson({
+          action: 'uploadPhoto',
+          manageId: id,
+          imageBase64: state.selectedPhotoData,
+          mimeType: 'image/jpeg',
+          photoField: 'inquiryPhotoUrl'
+        });
+        if (!photoResult.success) throw new Error(photoResult.error || '写真のアップロードに失敗しました');
+      }
 
-async function deleteFromGAS(id) {
-  if (!hasGasEndpoint()) return null;
-  const result = await gasRequest({ action: 'deleteItem', id });
-  if (result && result.success) {
-    console.log('スプレッドシートから削除:', id);
-  } else {
-    console.warn('スプレッドシート削除失敗:', result);
+      showToast('お問い合わせを受け付けました');
+      els.form.reset();
+      fillStoreRoomSelects();
+      fillTimeSelects();
+      state.selectedFile = null;
+      state.selectedPhotoData = '';
+      setPreview('');
+      await loadPublicItems();
+    } catch (err) {
+      console.error(err);
+      showToast('送信に失敗しました: ' + (err.message || err));
+    } finally {
+      els.submitBtn.disabled = false;
+      els.submitBtn.textContent = 'この内容で問い合わせする';
+    }
   }
-  return result;
-}
 
-// スプレッドシートから全件読み込み
-async function loadFromGAS() {
-  if (!ensureGasEndpointFromInput({ silent: true })) {
-    showSyncStatus('⚠️ GAS未設定：GASウェブアプリURLを保存してください');
-    return;
-  }
-  showSyncStatus('🔄 スプレッドシートから読み込み中...');
-  const result = await gasRequest({ action: 'getAll' });
-  if (result && result.success && result.items.length > 0) {
-    // スプレッドシートのデータをledgerDataに変換
-    ledgerData = result.items.map(row => ({
-      id:             row.id || '',
-      rowCreatedAt:   row.rowCreatedAt || '',
-      rowUpdatedAt:   row.rowUpdatedAt || '',
-      inquiryDate:    row.inquiryDate || '',
-      useDate:        row.useDate || '',
-      useTime:        row.useTime || '',
-      reserverName:   row.reserverName || '',
-      studioName:     row.studioName || '',
-      foundDate:      row.foundDate || '',
-      place:          row.place || '',
-      item:           row.item || '',
-      detail:         row.detail || '',
-      inquiryLocation:row.inquiryLocation || '',
-      inquiryPhotoUrl:row.inquiryPhotoUrl || '',
-      contact:        row.contact || '',
-      contactTel:     row.contactTel || '',
-      contactEmail:   row.contactEmail || '',
-      returnMethod:   row.returnMethod || 'pending',
-      urgency:        row.urgency || 'normal',
-      status:         row.status || 'searching',
-      deadline:       row.deadline || '',
-      value:          row.value || 'cheap',
-      publicName:     row.publicName || '',
-      boxNo:          row.boxNo || '',
-      photoData:      row.photoData || '',
-      terms1:         row.terms1 || '',
-      terms2:         row.terms2 || '',
-      terms3:         row.terms3 || '',
-      terms4:         row.terms4 || '',
-      terms5:         row.terms5 || '',
-    })).filter(d => d.id); // id空行を除外
-    // nextId を最新番号から算出
-    const nums = ledgerData.map(d => {
-      const m = d.id.match(/(\d+)$/);
-      return m ? parseInt(m[1]) : 0;
+  function bindEvents() {
+    els.searchInput.addEventListener('input', () => { state.keyword = els.searchInput.value; renderPublicList(); });
+    els.valueFilter.addEventListener('change', () => { state.valueFilter = els.valueFilter.value; renderPublicList(); });
+    els.reloadBtn.addEventListener('click', loadPublicItems);
+    els.form.addEventListener('submit', submitInquiry);
+    els.photoCamera.addEventListener('change', e => handlePhotoFile(e.target.files && e.target.files[0]));
+    els.photoFile.addEventListener('change', e => handlePhotoFile(e.target.files && e.target.files[0]));
+    els.photoClear.addEventListener('click', () => {
+      els.photoCamera.value = ''; els.photoFile.value = ''; state.selectedFile = null; state.selectedPhotoData = ''; setPreview('');
     });
-    nextId = Math.max(...nums, 0) + 1;
-    renderDashboard();
-    renderLedger();
-    renderPublicPage();
-    showSyncStatus('✅ ' + ledgerData.length + '件を読み込みました');
-  } else if (result && result.success && result.items.length === 0) {
-    ledgerData = [];
-    renderDashboard();
-    renderLedger();
-    renderPublicPage();
-    showSyncStatus('✅ スプレッドシートに登録データなし');
-  } else {
-    renderPublicPage();
-    showSyncStatus('❌ 読み込み失敗。GAS設定を確認してください');
-  }
-}
-
-// 同期ステータス表示
-function showSyncStatus(msg) {
-  const el = document.getElementById('sync-status');
-  if (el) {
-    el.textContent = msg;
-    el.style.display = '';
-    setTimeout(() => { el.style.display = 'none'; }, 4000);
-  }
-  showToast(msg);
-}
-
-// ── Toggle box number field ──
-function toggleBoxNo() {
-  const v = document.getElementById('m-value').value;
-  const g = document.getElementById('box-no-group');
-  if (g) g.style.display = v === 'cheap' ? '' : 'none';
-}
-
-// ── Public Page ──
-function openPublicPage() {
-  renderPublicPage();
-  document.getElementById('public-page').classList.add('open');
-}
-function closePublicPage() {
-  document.getElementById('public-page').classList.remove('open');
-}
-function renderPublicPage() {
-  const searchEl = document.getElementById('pub-search');
-  const valueEl = document.getElementById('pub-filter-value');
-  if (!list) return;
-  const search = ((searchEl && searchEl.value) || '').toLowerCase();
-  const filterVal = (valueEl && valueEl.value) || '';
-
-  const visible = ledgerData.filter(d => {
-    if (d.status === 'returned' || d.status === 'disposed') return false;
-    if (filterVal && d.value !== filterVal) return false;
-    const pn = (d.publicName || '').toLowerCase();
-    if (search && !pn.includes(search)) return false;
-    return true;
-  });
-
-  if (!visible.length) {
-    list.innerHTML = '<div class="empty-state"><div class="emoji">📭</div><p>現在保管中の忘れ物はありません</p></div>';
-    return;
   }
 
-  list.innerHTML = visible.map(d => {
-    const isCheap = (d.value || 'cheap') === 'cheap';
-    const tagHtml = isCheap
-      ? '<span class="tag tag-cheap">安価</span>'
-      : '<span class="tag tag-valuable">高価</span>';
-    const photoSrc = d.photoData || d.inquiryPhotoUrl || '';
-    const photoHtml = isCheap && photoSrc ? `
-      <div class="pub-photo-row">
-        ${renderThumbOnly(photoSrc, d.publicName || d.item, 'pub-thumb')}
-        <div class="pub-photo-actions">
-          <button class="photo-action-btn" onclick="openLightbox('${getDisplayPhotoUrl(photoSrc)}');event.stopPropagation();">写真を拡大</button>
-          <button class="photo-action-btn" onclick="openPhotoInNewTab('${getPhotoOpenUrl(photoSrc)}', event)">別タブで開く</button>
-          <div class="pub-photo-note">写真が開きにくい場合は「別タブで開く」をお試しください。</div>
-        </div>
-      </div>` : '';
-    const extraHtml = isCheap
-      ? `<div class="pub-box">📦 忘れ物ボックス：<strong>${d.boxNo || '番号未設定'}</strong>　→ 直接お引き取りください</div>`
-      : `<div class="pub-valuable-box">🔒 詳細は非公開です。心当たりがある場合は問い合わせフォームから申告してください。<br>本人確認書類が必要です。</div>`;
+  function init() {
+    fillTimeSelects();
+    fillStoreRoomSelects();
+    buildStoreFilters();
+    bindEvents();
+    loadPublicItems();
+  }
 
-    return `
-    <div class="pub-card">
-      <div class="pub-card-head">
-        <div>
-          <div class="pub-item-name">${d.publicName || d.item}</div>
-          <div class="pub-meta">発見日：${d.foundDate || '確認中'}</div>
-        </div>
-        ${tagHtml}
-      </div>
-      ${isCheap ? `<div class="pub-detail">発見場所：${d.place || '確認中'}</div>` : ''}
-      ${photoHtml}
-      ${extraHtml}
-    </div>`;
-  }).join('');
-}
-
-
-// ── Init ──
-renderDashboard();
-renderSOP();
-initGasEndpointUI();
-initUseTimeDropdowns();
-const appRole = document.body.dataset.role || 'staff';
-const initialPage = appRole === 'customer' ? 'form' : 'dashboard';
-showPage(initialPage);
-if (appRole !== 'customer' || hasGasEndpoint()) {
-  loadFromGAS();
-}
-
+  init();
+})();
 </script>
 </body>
 </html>
