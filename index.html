@@ -130,7 +130,12 @@
 </style>
 </head>
 <body>
-<script src="./config.js"></script>
+<script>
+  /* ★ GASのウェブアプリURLをここに貼り付けてください ★ */
+  window.APP_CONFIG = {
+    GAS_ENDPOINT: 'https://script.google.com/macros/s/AKfycbyztyK2tKo47vhMeeaVrCTifEx2Z2hJ2rl5p3Fb_4YQcZKQxjK57KH3kL-uaGaAY9Or/exec'
+  };
+</script>
 <header class="hero">
   <div class="container">
     <div class="hero-top">
@@ -497,8 +502,8 @@
 
   async function loadPublicItems() {
     if (!GAS_ENDPOINT) {
-      els.publicLoading.textContent = 'config.js のGAS設定が必要です';
-      showToast('config.js の GAS_ENDPOINT を確認してください');
+      els.publicLoading.textContent = 'GAS_ENDPOINTの設定が必要です';
+      showToast('index.html の GAS_ENDPOINT を確認してください');
       return;
     }
     els.publicLoading.textContent = '読み込み中…';
@@ -611,7 +616,7 @@
   async function submitInquiry(ev) {
     ev.preventDefault();
     if (!GAS_ENDPOINT) {
-      showToast('config.js の GAS_ENDPOINT を設定してください');
+      showToast('index.html の GAS_ENDPOINT を設定してください');
       return;
     }
     if (!els.startTime.value || !els.endTime.value) {
