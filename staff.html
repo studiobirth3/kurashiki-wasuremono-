@@ -1975,7 +1975,7 @@ let sopChecked = new Array(SOP_ITEMS.length).fill(false);
 
 // ── GAS Runtime Config ──
 const GAS_ENDPOINT_PLACEHOLDER = 'YOUR_SCRIPT_ID';
-const CONFIG_GAS_ENDPOINT = (window.APP_CONFIG && window.APP_CONFIG.GAS_ENDPOINT ? String(window.APP_CONFIG.GAS_ENDPOINT).trim() : '');
+const CONFIG_GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyztyK2tKo47vhMeeaVrCTifEx2Z2hJ2rl5p3Fb_4YQcZKQxjK57KH3kL-uaGaAY9Or/exec';
 let GAS_ENDPOINT = localStorage.getItem('lostItemGasEndpoint') || CONFIG_GAS_ENDPOINT || GAS_ENDPOINT_PLACEHOLDER;
 
 function getGasEndpoint() {
