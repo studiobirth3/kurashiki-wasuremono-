@@ -1924,7 +1924,6 @@ function jsonResponse(obj) {
 </div>
 <div class="toast-container" id="toast-container"></div>
 
-<script src="./config.js"></script>
 <script>
 // ── Data ──
 let ledgerData = [
@@ -3079,6 +3078,7 @@ function closePublicPage() {
   document.getElementById('public-page').classList.remove('open');
 }
 function renderPublicPage() {
+  const list = document.getElementById('pub-list');  // ← バグ修正: list が未宣言だったため追加
   const searchEl = document.getElementById('pub-search');
   const valueEl = document.getElementById('pub-filter-value');
   if (!list) return;
