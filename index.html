@@ -85,6 +85,18 @@
   .check input{width:16px;height:16px;margin-top:2px;accent-color:var(--accent)}
   .check span{font-size:12px;color:var(--text-sub)}
   .sticky-actions{position:sticky;bottom:12px;padding-top:12px;background:linear-gradient(to top, rgba(255,255,255,1) 70%, rgba(255,255,255,0))}
+
+  .hero-cta{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-top:16px}
+  .hero-cta-card{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:16px;padding:14px 16px;backdrop-filter:blur(6px)}
+  .hero-cta-title{font-size:14px;font-weight:700;margin-bottom:6px}
+  .hero-cta-text{font-size:12px;opacity:.92}
+  .hero-cta-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .hero-cta-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;border-radius:999px;background:#fff;color:var(--accent);font-size:12px;font-weight:700;border:none;cursor:pointer}
+  .hero-cta-btn.secondary{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.22)}
+  .public-emphasis{padding:12px 14px;border-radius:12px;background:var(--accent-light);border:1px solid #d3e4d9;margin-bottom:12px}
+  .public-emphasis strong{display:block;font-size:13px;color:var(--accent);margin-bottom:2px}
+  .public-emphasis span{display:block;font-size:12px;color:var(--text-sub)}
+  .section-anchor{scroll-margin-top:16px}
   .toast-wrap{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:999}
   .toast{background:#1f1d1a;color:#fff;padding:12px 14px;border-radius:12px;font-size:13px;box-shadow:var(--shadow-md)}
   .loading{font-size:12px;color:var(--text-sub)}
@@ -109,6 +121,10 @@
     .time-row{grid-template-columns:1fr}
     .time-sep{display:none}
     .staff-link{width:100%;justify-content:center}
+
+    .hero-cta{grid-template-columns:1fr}
+    .hero-cta-actions{flex-direction:column}
+    .hero-cta-btn{width:100%}
   }
 </style>
 </head>
@@ -121,20 +137,36 @@
         <h1>忘れ物お問い合わせ</h1>
         <p>公開一覧の確認と、お問い合わせ送信ができます。スタッフ用の管理機能は表示されません。</p>
       </div>
-      <a class="staff-link" href="./staff.html">スタッフ用画面はこちら</a>
     </div>
+
+    <div class="hero-cta">
+      <div class="hero-cta-card">
+        <div class="hero-cta-title">まずはご利用店舗を選んで、公開一覧をご確認ください</div>
+        <div class="hero-cta-text">倉敷・問屋町・下中野・表町ごとに絞り込んで、忘れ物を探せます。</div>
+        <div class="hero-cta-actions">
+          <a class="hero-cta-btn" href="#public-section">店舗を選んで確認する</a>
+          <a class="hero-cta-btn secondary" href="#form-section">問い合わせはこちら</a>
+        </div>
+      </div>
+      <div class="hero-cta-card">
+        <div class="hero-cta-title">見つからない場合もそのままお問い合わせできます</div>
+        <div class="hero-cta-text">写真添付も可能です。ご利用日・店舗名・特徴をできるだけ詳しくご入力ください。</div>
+      </div>
+    </div>
+
   </div>
 </header>
 
 <main class="main">
   <div class="container">
     <div class="grid">
-      <section class="card" id="public-section">
+      <section class="card section-anchor" id="public-section">
         <div class="card-header">
           <h2>公開一覧</h2>
           <div class="small muted" id="last-sync">読み込み前</div>
         </div>
         <div class="card-body">
+          <div class="public-emphasis"><strong>店舗を選ぶと、その店舗の忘れ物だけに絞って確認できます</strong><span>まずは上のタブまたはプルダウンでご利用店舗を選択してください。</span></div>
           <div class="notice info" style="margin-bottom:12px;">
             公開一覧には、返却済み・処分済み以外の忘れ物が表示されます。安価な物はボックス番号まで、高価な物は問い合わせ案内を表示します。
           </div>
@@ -162,12 +194,13 @@
         </div>
       </section>
 
-      <section class="card" id="form-section">
+      <section class="card section-anchor" id="form-section">
         <div class="card-header">
           <h2>お問い合わせフォーム</h2>
           <div class="small muted">送信内容はスタッフ側の台帳に登録されます</div>
         </div>
         <div class="card-body">
+          <div class="public-emphasis"><strong>お問い合わせはこちら</strong><span>公開一覧に見当たらない場合や、高価な物で詳細非公開の場合は、このフォームからご連絡ください。</span></div>
           <div class="notice warn" style="margin-bottom:12px;">
             お問い合わせ後、スタッフが順次確認します。すぐに見つからない場合がありますのでご了承ください。
           </div>
